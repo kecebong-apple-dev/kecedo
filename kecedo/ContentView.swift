@@ -13,18 +13,9 @@ struct ContentView: View {
     
     var body: some View {
         TabView {
-            VStack {
-                Text("KeceDo")
-                List (TaskModel.dummyTasks.indices, id: \.self) {
-                    index in
-                    
-                    let task = TaskModel.dummyTasks[index]
-                    
-                    Text("\(index + 1). \(task.title)")
-                }
-            }
+            Matrix()
             .tabItem {
-                Label("Home", systemImage: "checklist")
+                Label("Matrix", systemImage: "square.grid.2x2")
             }
             Text("Calendar")
             .tabItem {
