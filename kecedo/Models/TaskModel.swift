@@ -16,20 +16,22 @@ class TaskModel: Identifiable {
     var desc: String
     var startDate: Date
     var endDate: Date
+    var priority: Priority
     
-    init(id: UUID = UUID(), title: String, description: String, startDate: Date, endDate: Date) {
+    init(id: UUID = UUID(), title: String, desc: String, startDate: Date, endDate: Date, priority: Priority) {
         self.id = id
         self.title = title
-        self.desc = description
+        self.desc = desc
         self.startDate = startDate
         self.endDate = endDate
+        self.priority = priority
     }
     
     static var dummyTasks: [TaskModel] {
         let now = Date()
         
-        let task1 = TaskModel(title: "Finish SwiftUI Onboarding", description: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000))
-        let task2 = TaskModel(title: "Read Self-Learning Research Paper", description: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(86400 * 2))
+        let task1 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst)
+        let task2 = TaskModel(title: "Read Self-Learning Research Paper", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(86400 * 2), priority: Priority.schedule)
         
         return [task1, task2]
     }

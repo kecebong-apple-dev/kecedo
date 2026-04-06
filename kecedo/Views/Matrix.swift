@@ -17,6 +17,8 @@ struct Matrix: View {
                 let task = TaskModel.dummyTasks[index]
                 
                 Text("\(index + 1). \(task.title)")
+                    .foregroundStyle(task.priority.color.primary)
+                    .background(task.priority.color.secondary)
             }
         }
     }
