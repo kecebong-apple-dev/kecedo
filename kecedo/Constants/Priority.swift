@@ -36,7 +36,7 @@ enum Priority: String, Codable, Identifiable {
         case .doFirst: return MultiColor(primary: Color(hex: "#33C65B"), secondary: Color(hex: "#E2FFEA"))
         case .schedule: return MultiColor(primary: Color(hex: "#FFCC01"), secondary: Color(hex: "#FFF6D2"))
         case .delegate: return MultiColor(primary: Color(hex: "#29B9FF"), secondary: Color(hex: "#CFEFFF"))
-        case .eliminate: return MultiColor(primary: Color(hex: "#EF4C14"), secondary: Color(hex: "#FE3054"))
+        case .eliminate: return MultiColor(primary: Color(hex: "#EF4C14"), secondary: Color(hex: "#FFE3E3"))
         }
     }
 }
