@@ -13,7 +13,7 @@ struct ContentView: View {
     
     var body: some View {
         TabView {
-            Matrix()
+            MatrixView()
             .tabItem {
                 Label("Matrix", systemImage: "square.grid.2x2")
             }
