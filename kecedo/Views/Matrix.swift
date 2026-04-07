@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct Matrix: View {
+    
+    @State var isPresented: Bool = false
+    
     var body: some View {
         VStack {
             Text("KeceDo")
@@ -19,6 +22,14 @@ struct Matrix: View {
                 Text("\(index + 1). \(task.title)")
                     .foregroundStyle(task.priority.color.primary)
                     .background(task.priority.color.secondary)
+            }
+            Button {
+                isPresented.toggle()
+            } label: {
+                Text("Add")
+            }
+            .sheet(isPresented: $isPresented) {
+                AddTaskView()
             }
         }
     }
