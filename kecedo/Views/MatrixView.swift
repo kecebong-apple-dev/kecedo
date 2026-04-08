@@ -60,18 +60,29 @@ private struct TaskRowView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(task.title)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(task.isDone ? Color(.systemGray3) : .primary)
+                    .strikethrough(task.isDone, color: Color(.systemGray3))
                     .lineLimit(2)
                 Text(dateText)
                     .font(.system(size: 11))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(task.isDone ? Color(.systemGray4) : .secondary)
             }
             Spacer()
             // Completion circle — toggle by tapping
             Button(action: onToggle) {
-                Circle()
-                    .strokeBorder(priority.color.primary, lineWidth: 1.5)
-                    .frame(width: 22, height: 22)
+                ZStack {
+                    Circle()
+                        .fill(task.isDone ? priority.color.primary : Color.clear)
+                        .frame(width: 22, height: 22)
+                    Circle()
+                        .strokeBorder(priority.color.primary, lineWidth: 1.5)
+                        .frame(width: 22, height: 22)
+                    if task.isDone {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
             }
             .buttonStyle(.plain)
         }
@@ -154,7 +165,7 @@ struct MatrixView: View {
                                     QuadrantCellView(
                                         priority: .doFirst,
                                         tasks: tasks(for: .doFirst),
-                                        onToggle: deleteTask,
+                                        onToggle: toggleDone,
                                         onTap: { selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
@@ -162,7 +173,7 @@ struct MatrixView: View {
                                     QuadrantCellView(
                                         priority: .schedule,
                                         tasks: tasks(for: .schedule),
-                                        onToggle: deleteTask,
+                                        onToggle: toggleDone,
                                         onTap: { selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
@@ -171,7 +182,7 @@ struct MatrixView: View {
                                     QuadrantCellView(
                                         priority: .delegate,
                                         tasks: tasks(for: .delegate),
-                                        onToggle: deleteTask,
+                                        onToggle: toggleDone,
                                         onTap: { selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
@@ -179,7 +190,7 @@ struct MatrixView: View {
                                     QuadrantCellView(
                                         priority: .eliminate,
                                         tasks: tasks(for: .eliminate),
-                                        onToggle: deleteTask,
+                                        onToggle: toggleDone,
                                         onTap: { selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
@@ -217,8 +228,8 @@ struct MatrixView: View {
             .clipped()
     }
 
-    private func deleteTask(_ task: TaskModel) {
-        context.delete(task)
+    private func toggleDone(_ task: TaskModel) {
+        task.isDone.toggle()
     }
 }
 
