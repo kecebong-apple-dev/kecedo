@@ -102,19 +102,23 @@ struct MatrixView: View {
 
     @State private var showingAddTask = false
     @State private var selectedTask: TaskModel? = nil
+    
+    var filterState: MatrixFilterState = MatrixFilterState()
+    var onSettings: () -> Void = {}
+    var onFilter: () -> Void = {}
+    var onSwap: () -> Void = {}
 
     private let columnLabels = ["Urgent", "Not Urgent"]
 
     // Helper: filter tasks per priority quadrant
     private func tasks(for priority: Priority) -> [TaskModel] {
-        allTasks.filter { $0.priority == priority }
+        allTasks.applying(filter: filterState).filter { $0.priority == priority }
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
 
-                // ── Manual large title (inline nav bar = no UIKit scroll hijack) ──
+            // ── Manual large title (inline nav bar = no UIKit scroll hijack) ──
                 HStack {
                     Text("Matrix")
                         .font(.largeTitle)
@@ -202,7 +206,13 @@ struct MatrixView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarMain(showingAddTask: $showingAddTask)
+            .toolbarMain(
+                items: .matrix,
+                showingAddTask: $showingAddTask,
+                onSettings: onSettings,
+                onFilter: onFilter,
+                onSwap: onSwap
+            )
             // Add new task
             .sheet(isPresented: $showingAddTask) {
                 AddTaskView()
@@ -212,7 +222,6 @@ struct MatrixView: View {
             .sheet(item: $selectedTask) { task in
                 AddTaskView(taskToEdit: task)
             }
-        }
     }
 
     // MARK: Helpers
