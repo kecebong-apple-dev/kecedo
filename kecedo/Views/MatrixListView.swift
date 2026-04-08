@@ -120,6 +120,7 @@ private struct TaskRow: View {
     let task: TaskModel
     let iconMode: MatrixMode
     let onToggle: () -> Void
+    let onTap: () -> Void
     
     // Logika untuk menentukan teks, warna, dan ikon berdasarkan waktu tenggat
     private var statusInfo: (text: String, color: Color, icon: String?) {
@@ -193,6 +194,8 @@ private struct TaskRow: View {
         .background(Color.white)
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.04), radius: 5, y: 2)
+        .contentShape(Rectangle())
+        .onTapGesture { onTap() }
     }
 }
 
@@ -210,6 +213,7 @@ struct MatrixListView: View {
     
     @State private var showingAddTask = false
     @State private var selectedMode: MatrixMode = .all
+    @State private var selectedTask: TaskModel? = nil
     
     private var filteredTasks: [TaskModel] {
         let baseTasks = tasks.applying(filter: filterState)
@@ -230,20 +234,20 @@ struct MatrixListView: View {
     }
     
     var body: some View {
-        ZStack {
-            Color(UIColor.systemGroupedBackground)
-                .ignoresSafeArea()
+        VStack(spacing: 0) {
             
-            VStack(spacing: 0) {
-                
+            // ── Manual large title (inline nav bar = no UIKit scroll hijack) ──
+            HStack {
                 Text("Matrix")
-                    .font(.system(size: 34, weight: .bold))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                    .padding(.top, 16)
-                    .padding(.bottom, 16)
-                
-                ScrollView(showsIndicators: false) {
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+            .padding(.bottom, 4)
+            
+            ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         ModeSelector(selected: selectedMode, onSelect: { selectedMode = $0 })
                         
@@ -260,6 +264,9 @@ struct MatrixListView: View {
                                             withAnimation {
                                                 task.isDone.toggle()
                                             }
+                                        },
+                                        onTap: {
+                                            selectedTask = task
                                         })
                             }
                         }
@@ -279,7 +286,11 @@ struct MatrixListView: View {
             .sheet(isPresented: $showingAddTask) {
                 AddTaskView()
             }
-        }
+            // Edit existing task — use .sheet(item:) so it re-opens correctly
+            // when tapping different tasks back-to-back
+            .sheet(item: $selectedTask) { task in
+                AddTaskView(taskToEdit: task)
+            }
     }
 }
 
