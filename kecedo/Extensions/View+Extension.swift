@@ -27,4 +27,39 @@ extension View {
             .cornerRadius(8)
             .shadow(color: .black.opacity(0.12), radius: 18, x: 0, y: 0)
     }
+    
+    ///    - All 4 (default)
+    ///    .toolbarMain(showingAddTask: $showingAddTask)
+    ///    - Only settings + add task
+    ///    .toolbarMain(
+    ///       items: [.settings, .addTask],
+    ///       showingAddTask: $showingAddTask,
+    ///       onSettings: { navigate() }
+    ///    )
+    ///    - Using a preset
+    ///    .toolbarMain(
+    ///        items: .matrix,
+    ///        showingAddTask: $showingAddTask
+    ///    )
+    ///    - Single item
+    ///    .toolbarMain(
+    ///        items: .addTask,
+    ///        showingAddTask: $showingAddTask
+    ///    )
+    func toolbarMain(
+        items: ToolbarMainItems = .matrix,
+        showingAddTask: Binding<Bool> = .constant(false),
+        onSettings: @escaping () -> Void = {},
+        onFilter: @escaping () -> Void = {},
+        onSwap: @escaping () -> Void = {}
+    ) -> some View {
+        modifier(ToolbarMain(
+            items: items,
+            showingAddTask: showingAddTask,
+            onSettings: onSettings,
+            onFilter: onFilter,
+            onSwap: onSwap
+        ))
+    }
+    
 }

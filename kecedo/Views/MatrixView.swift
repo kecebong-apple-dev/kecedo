@@ -8,19 +8,22 @@
 import SwiftUI
 import SwiftData
 
-// MARK: - Quadrant Cell
+// MARK: Quadrant Cell
 
 private struct QuadrantCellView: View {
     let priority: Priority
     let tasks: [TaskModel]
     let onToggle: (TaskModel) -> Void
-    
+    let onTap: (TaskModel) -> Void
+
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(tasks) { task in
                     TaskRowView(task: task, priority: priority) {
                         onToggle(task)
+                    } onTap: {
+                        onTap(task)
                     }
                     if task.id != tasks.last?.id {
                         Divider().opacity(0.4)
@@ -38,19 +41,20 @@ private struct QuadrantCellView: View {
     }
 }
 
-// MARK: - Task Row
+// MARK: Task Row
 
 private struct TaskRowView: View {
     let task: TaskModel
     let priority: Priority
     let onToggle: () -> Void
-    
+    let onTap: () -> Void
+
     private var dateText: String {
         let f = DateFormatter()
         f.dateFormat = "MMM d, h:mm a"
         return f.string(from: task.endDate)
     }
-    
+
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
@@ -72,30 +76,33 @@ private struct TaskRowView: View {
             .buttonStyle(.plain)
         }
         .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .onTapGesture { onTap() }
     }
 }
 
-// MARK: - Matrix View
+// MARK: Matrix View
 
 struct MatrixView: View {
-    
+
     // Fetch all tasks from SwiftData; sort by endDate ascending
     @Query(sort: \TaskModel.endDate) private var allTasks: [TaskModel]
     @Environment(\.modelContext) private var context
-    
+
     @State private var showingAddTask = false
-    
+    @State private var selectedTask: TaskModel? = nil
+
     private let columnLabels = ["Urgent", "Not Urgent"]
-    
+
     // Helper: filter tasks per priority quadrant
     private func tasks(for priority: Priority) -> [TaskModel] {
         allTasks.filter { $0.priority == priority }
     }
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                
+
                 // ── Manual large title (inline nav bar = no UIKit scroll hijack) ──
                 HStack {
                     Text("Matrix")
@@ -106,7 +113,7 @@ struct MatrixView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 4)
                 .padding(.bottom, 4)
-                
+
                 // ── Grid ──────────────────────────────────────────────────────────
                 GeometryReader { geo in
                     let hPad:    CGFloat = 12
@@ -115,9 +122,9 @@ struct MatrixView: View {
                     let headerH: CGFloat = 30
                     let cellH = (geo.size.height - headerH - gap) / 2
                     let cellW = (geo.size.width  - hPad * 2 - labelW - gap) / 2
-                    
+
                     VStack(spacing: 0) {
-                        
+
                         // Column headers
                         HStack(spacing: 0) {
                             Color.clear.frame(width: labelW)
@@ -130,31 +137,33 @@ struct MatrixView: View {
                         }
                         .frame(height: headerH)
                         .padding(.horizontal, hPad)
-                        
+
                         // 2×2 quadrants
                         HStack(alignment: .top, spacing: 0) {
-                            
+
                             // Row labels
                             VStack(spacing: gap) {
                                 rowLabel("Important",     height: cellH)
                                 rowLabel("Not Important", height: cellH)
                             }
                             .frame(width: labelW)
-                            
+
                             // Cells
                             VStack(spacing: gap) {
                                 HStack(spacing: gap) {
                                     QuadrantCellView(
                                         priority: .doFirst,
                                         tasks: tasks(for: .doFirst),
-                                        onToggle: deleteTask
+                                        onToggle: deleteTask,
+                                        onTap: { selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
-                                    
+
                                     QuadrantCellView(
                                         priority: .schedule,
                                         tasks: tasks(for: .schedule),
-                                        onToggle: deleteTask
+                                        onToggle: deleteTask,
+                                        onTap: { selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
                                 }
@@ -162,14 +171,16 @@ struct MatrixView: View {
                                     QuadrantCellView(
                                         priority: .delegate,
                                         tasks: tasks(for: .delegate),
-                                        onToggle: deleteTask
+                                        onToggle: deleteTask,
+                                        onTap: { selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
-                                    
+
                                     QuadrantCellView(
                                         priority: .eliminate,
                                         tasks: tasks(for: .eliminate),
-                                        onToggle: deleteTask
+                                        onToggle: deleteTask,
+                                        onTap: { selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
                                 }
@@ -179,46 +190,22 @@ struct MatrixView: View {
                     }
                 }
             }
-            // .inline disables UIKit's large-title scroll observer entirely
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Color.clear // hide the inline centre title
-                }
-                
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button { } label: {
-                        Image(systemName: "gearshape")
-                            .foregroundColor(.primary)
-                    }
-                }
-
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button { } label: {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                            .foregroundColor(.primary)
-                    }
-                    Button { } label: {
-                        Image(systemName: "rectangle.2.swap")
-                            .foregroundColor(.primary)
-                    }
-                }
-
-                ToolbarItem(placement: .primaryAction) {
-                    Button { showingAddTask = true } label: {
-                        Image(systemName: "plus")
-                            .foregroundColor(.primary)
-                    }
-                }
-            }
+            .toolbarMain(showingAddTask: $showingAddTask)
+            // Add new task
             .sheet(isPresented: $showingAddTask) {
-                AddTaskSheet()
+                AddTaskView()
+            }
+            // Edit existing task — use .sheet(item:) so it re-opens correctly
+            // when tapping different tasks back-to-back
+            .sheet(item: $selectedTask) { task in
+                AddTaskView(taskToEdit: task)
             }
         }
     }
-    
-    // MARK: - Helpers
-    
+
+    // MARK: Helpers
+
     @ViewBuilder
     private func rowLabel(_ text: String, height: CGFloat) -> some View {
         Text(text)
@@ -229,82 +216,22 @@ struct MatrixView: View {
             .frame(width: 28, height: height)
             .clipped()
     }
-    
+
     private func deleteTask(_ task: TaskModel) {
         context.delete(task)
     }
 }
 
-// MARK: - Add Task Sheet
-
-private struct AddTaskSheet: View {
-    @Environment(\.modelContext) private var context
-    @Environment(\.dismiss) private var dismiss
-    
-    @State private var title = ""
-    @State private var desc = ""
-    @State private var startDate = Date()
-    @State private var endDate = Date().addingTimeInterval(3600)
-    @State private var priority: Priority = .doFirst
-    
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Task") {
-                    TextField("Title", text: $title)
-                    TextField("Description", text: $desc)
-                }
-                Section("Priority") {
-                    Picker("Priority", selection: $priority) {
-                        ForEach(Priority.allCases) { p in
-                            Text(p.name).tag(p)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                }
-                Section("Dates") {
-                    DatePicker("Start", selection: $startDate)
-                    DatePicker("Due",   selection: $endDate)
-                }
-            }
-            .navigationTitle("New Task")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
-                        let task = TaskModel(
-                            title: title,
-                            desc: desc,
-                            startDate: startDate,
-                            endDate: endDate,
-                            priority: priority
-                        )
-                        context.insert(task)
-                        dismiss()
-                    }
-                    .fontWeight(.semibold)
-                    .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Preview
+// MARK: Preview
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: TaskModel.self, configurations: config)
-    
-    // 1. Loop through your dummy data
+
     for task in TaskModel.dummyTasks {
-        // 2. Insert them into the preview's database
         container.mainContext.insert(task)
     }
-    
+
     return MatrixView()
-        .modelContainer(container) // 3. Pass the populated container
+        .modelContainer(container)
 }
