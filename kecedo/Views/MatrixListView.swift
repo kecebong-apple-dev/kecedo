@@ -8,6 +8,8 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Types
+
 enum MatrixMode: CaseIterable, Equatable {
     case all
     case urgentImportant
@@ -25,9 +27,32 @@ enum MatrixMode: CaseIterable, Equatable {
         case .notUrgentNotImportant: return .eliminate
         }
     }
+    
+    func tint(forSelected isSelected: Bool) -> Color {
+        guard isSelected else { return .white }
+        switch self {
+        case .all: return .gray.opacity(0.15)
+        default:
+            if let priority = priority {
+                return priority.color.secondary.opacity(0.25)
+            }
+            return .white
+        }
+    }
 }
 
-// MARK: - Komponen Ikon Grid Matriks (2x2)
+// MARK: - Extensions / Helpers
+
+extension DateFormatter {
+    static let matrixTime: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, h:mm a"
+        return formatter
+    }()
+}
+
+// MARK: - Subviews
+
 struct MatrixGridBadge: View {
     var mode: MatrixMode
     
@@ -45,7 +70,7 @@ struct MatrixGridBadge: View {
     }
     
     @ViewBuilder
-    func quadrantSquare(for targetMode: MatrixMode, color: Color) -> some View {
+    private func quadrantSquare(for targetMode: MatrixMode, color: Color) -> some View {
         if mode == .all {
             RoundedRectangle(cornerRadius: 3)
                 .fill(color)
@@ -60,162 +85,122 @@ struct MatrixGridBadge: View {
     }
 }
 
-// MARK: - Tampilan Utama
-struct MatrixListView: View {
-    @Environment(\.modelContext) private var modelContext
+private struct TopBar: View {
+    let onSettings: () -> Void
+    let onLayout: () -> Void
+    let onSwitch: () -> Void
+    let onAdd: () -> Void
     
-    // Mengambil data langsung dari SwiftData
-    @Query(sort: \TaskModel.endDate) private var tasks: [TaskModel]
-    
-    @State private var selectedMode: MatrixMode = .all
-    
-    private var filteredTasks: [TaskModel] {
-        switch selectedMode {
-        case .all:
-            return tasks
-        default:
-            return tasks.filter { $0.priority == selectedMode.priority }
+    var body: some View {
+        HStack {
+            Button(action: onSettings) {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 20))
+                    .foregroundColor(.primary)
+                    .frame(width: 44, height: 44)
+                    .background(Color.white)
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
+            }
+            
+            Spacer()
+            
+            HStack(spacing: 12) {
+                HStack(spacing: 20) {
+                    Button(action: onLayout) {
+                        Image(systemName: "line.3.horizontal.circle")
+                            .font(.system(size: 20))
+                            .foregroundColor(.primary)
+                    }
+                    Button(action: onSwitch) {
+                        Image(systemName: "rectangle.2.swap")
+                            .font(.system(size: 18))
+                            .foregroundColor(.primary)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .frame(height: 44)
+                .background(Color.white)
+                .clipShape(Capsule())
+                .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
+                
+                Button(action: onAdd) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 20))
+                        .foregroundColor(.primary)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white)
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
+                }
+            }
         }
+        .padding(.horizontal)
+        .padding(.top, 10)
     }
+}
+
+private struct ModeSelector: View {
+    let selected: MatrixMode
+    let onSelect: (MatrixMode) -> Void
     
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, h:mm a"
-        return formatter.string(from: date)
+    var body: some View {
+        HStack(spacing: 12) {
+            ForEach(MatrixMode.allCases, id: \.self) { mode in
+                Button {
+                    withAnimation {
+                        onSelect(mode)
+                    }
+                } label: {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(mode.tint(forSelected: mode == selected))
+                            .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
+                        
+                        MatrixGridBadge(mode: mode)
+                            .frame(width: 28, height: 28)
+                    }
+                    .frame(width: 60, height: 60)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+private struct TaskRow: View {
+    let task: TaskModel
+    let iconMode: MatrixMode
+    let onToggle: () -> Void
+    
+    // Logika untuk menentukan teks, warna, dan ikon berdasarkan waktu tenggat
+    private var statusInfo: (text: String, color: Color, icon: String?) {
+        let dateString = DateFormatter.matrixTime.string(from: task.endDate)
+        
+        // Jika tugas sudah selesai, tampilkan abu-abu netral
+        if task.isDone {
+            return (dateString, .gray, nil)
+        }
+        
+        let timeInterval = task.endDate.timeIntervalSinceNow
+        
+        if timeInterval < 0 {
+            // Overdue (Lebih dari batas waktu) -> Merah
+            return ("Overdue - \(dateString)", .red, "exclamationmark.circle.fill")
+        } else if timeInterval < 86400 { // Kurang dari 24 Jam -> Oranye
+            let hours = Int(timeInterval / 3600)
+            let hourText = hours > 0 ? "Due in \(hours) \(hours == 1 ? "hour" : "hours")" : "Due in less than an hour"
+            return ("\(hourText) - \(dateString)", .orange, "alarm.fill")
+        } else {
+            // Normal -> Abu-abu
+            return (dateString, .gray, nil)
+        }
     }
     
     var body: some View {
-        ZStack {
-            Color(UIColor.systemGroupedBackground)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // 1. Top Bar
-                HStack {
-                    Button(action: {}) {
-                        Image(systemName: "gearshape")
-                            .font(.system(size: 20))
-                            .foregroundColor(.primary)
-                            .frame(width: 44, height: 44)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
-                    }
-                    
-                    Spacer()
-                    
-                    HStack(spacing: 12) {
-                        HStack(spacing: 20) {
-                            Button(action: {}) {
-                                Image(systemName: "line.3.horizontal.circle")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.primary)
-                            }
-                            Button(action: {}) {
-                                Image(systemName: "rectangle.2.swap")
-                                    .font(.system(size: 18))
-                                    .foregroundColor(.primary)
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                        .frame(height: 44)
-                        .background(Color.white)
-                        .clipShape(Capsule())
-                        .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
-                        
-                        Button(action: {}) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 20))
-                                .foregroundColor(.primary)
-                                .frame(width: 44, height: 44)
-                                .background(Color.white)
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
-                        }
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.top, 10)
-                
-                // 2. Judul
-                Text("Matrix")
-                    .font(.system(size: 34, weight: .bold))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                    .padding(.top, 16)
-                    .padding(.bottom, 16)
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        // 3. Filter
-                        HStack(spacing: 12) {
-                            ForEach(MatrixMode.allCases, id: \.self) { mode in
-                                Button {
-                                    withAnimation {
-                                        selectedMode = mode
-                                    }
-                                } label: {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .fill(backgroundColor(for: mode))
-                                            .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
-                                        
-                                        MatrixGridBadge(mode: mode)
-                                            .frame(width: 28, height: 28)
-                                    }
-                                    .frame(width: 60, height: 60)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding(.horizontal)
-                        
-                        // 4. Label
-                        Text("Today")
-                            .font(.title2)
-                            .bold()
-                            .padding(.top, 8)
-                        
-                        // 5. List Tasks
-                        LazyVStack(spacing: 12) {
-                            ForEach(filteredTasks) { task in
-                                taskCard(for: task)
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 100)
-                    }
-                }
-            }
-        }
-    }
-    
-    private func backgroundColor(for mode: MatrixMode) -> Color {
-        if selectedMode == mode {
-            if mode == .all {
-                return Color.gray.opacity(0.15)
-            }
-            if let priority = mode.priority {
-                return priority.color.secondary.opacity(0.25)
-            }
-        }
-        return Color.white
-    }
-    
-    // Konversi dari Priority ke MatrixMode untuk Icon
-    private func getMode(fromPriority priority: Priority) -> MatrixMode {
-        switch priority {
-        case .doFirst: return .urgentImportant
-        case .schedule: return .notUrgentImportant
-        case .delegate: return .urgentNotImportant
-        case .eliminate: return .notUrgentNotImportant
-        }
-    }
-    
-    @ViewBuilder
-    private func taskCard(for task: TaskModel) -> some View {
         HStack(spacing: 16) {
-            MatrixGridBadge(mode: getMode(fromPriority: task.priority))
+            MatrixGridBadge(mode: iconMode)
                 .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: 4) {
@@ -223,20 +208,22 @@ struct MatrixListView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(task.isDone ? .gray : .primary)
                     .strikethrough(task.isDone, color: .gray)
+                    .lineLimit(1) // Memotong teks panjang menjadi "..."
                 
-                Text(formattedDate(task.endDate))
-                    .font(.system(size: 13))
-                    .foregroundColor(.gray)
+                let status = statusInfo
+                HStack(spacing: 4) {
+                    if let icon = status.icon {
+                        Image(systemName: icon)
+                    }
+                    Text(status.text)
+                }
+                .font(.system(size: 13, weight: status.icon != nil ? .medium : .regular))
+                .foregroundColor(status.color)
             }
             
-            Spacer()
+            Spacer(minLength: 12) // Mendorong teks ke kiri agar tidak menabrak tombol
             
-            Button {
-                withAnimation {
-                    // Karena menggunakan SwiftData, mengubah properti akan otomatis tersimpan
-                    task.isDone.toggle()
-                }
-            } label: {
+            Button(action: onToggle) {
                 ZStack {
                     Circle()
                         .stroke(task.isDone ? Color.clear : Color.gray.opacity(0.4), lineWidth: 1.5)
@@ -262,7 +249,78 @@ struct MatrixListView: View {
     }
 }
 
-// MARK: - Preview Setup dengan Data Dummy SwiftData
+// MARK: - Main View
+
+struct MatrixListView: View {
+    @Environment(\.modelContext) private var modelContext
+    
+    @Query(sort: \TaskModel.endDate) private var tasks: [TaskModel]
+    
+    @State private var selectedMode: MatrixMode = .all
+    
+    private var filteredTasks: [TaskModel] {
+        if let p = selectedMode.priority {
+            return tasks.filter { $0.priority == p }
+        } else {
+            return tasks
+        }
+    }
+    
+    private func mode(from priority: Priority) -> MatrixMode {
+        switch priority {
+        case .doFirst: return .urgentImportant
+        case .schedule: return .notUrgentImportant
+        case .delegate: return .urgentNotImportant
+        case .eliminate: return .notUrgentNotImportant
+        }
+    }
+    
+    var body: some View {
+        ZStack {
+            Color(UIColor.systemGroupedBackground)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                TopBar(onSettings: {}, onLayout: {}, onSwitch: {}, onAdd: {})
+                
+                Text("Matrix")
+                    .font(.system(size: 34, weight: .bold))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    .padding(.top, 16)
+                    .padding(.bottom, 16)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        ModeSelector(selected: selectedMode, onSelect: { selectedMode = $0 })
+                        
+                        Text("Today")
+                            .font(.title2)
+                            .bold()
+                            .padding(.top, 8)
+                        
+                        LazyVStack(spacing: 12) {
+                            ForEach(filteredTasks) { task in
+                                TaskRow(task: task,
+                                        iconMode: mode(from: task.priority),
+                                        onToggle: {
+                                            withAnimation {
+                                                task.isDone.toggle()
+                                            }
+                                        })
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 100)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Preview Setup
+
 @MainActor
 let previewContainer: ModelContainer = {
     do {
@@ -270,8 +328,6 @@ let previewContainer: ModelContainer = {
             for: TaskModel.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
-        
-        // Memasukkan data dummy ke dalam container memory untuk preview
         for task in TaskModel.dummyTasks {
             container.mainContext.insert(task)
         }
