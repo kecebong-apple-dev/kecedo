@@ -28,7 +28,7 @@ enum MatrixMode: CaseIterable, Equatable {
 }
 
 // MARK: - Komponen Ikon Grid Matriks (2x2)
-struct MatrixGridIcon: View {
+struct MatrixGridBadge: View {
     var mode: MatrixMode
     
     var body: some View {
@@ -160,7 +160,7 @@ struct MatrixListView: View {
                                             .fill(backgroundColor(for: mode))
                                             .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
                                         
-                                        MatrixGridIcon(mode: mode)
+                                        MatrixGridBadge(mode: mode)
                                             .frame(width: 28, height: 28)
                                     }
                                     .frame(width: 60, height: 60)
@@ -193,17 +193,17 @@ struct MatrixListView: View {
     private func backgroundColor(for mode: MatrixMode) -> Color {
         if selectedMode == mode {
             if mode == .all {
-                return Color(UIColor.darkGray)
+                return Color.gray.opacity(0.15)
             }
             if let priority = mode.priority {
-                return priority.color.secondary
+                return priority.color.secondary.opacity(0.25)
             }
         }
         return Color.white
     }
     
     // Konversi dari Priority ke MatrixMode untuk Icon
-    private func getMode(from priority: Priority) -> MatrixMode {
+    private func getMode(fromPriority priority: Priority) -> MatrixMode {
         switch priority {
         case .doFirst: return .urgentImportant
         case .schedule: return .notUrgentImportant
@@ -215,7 +215,7 @@ struct MatrixListView: View {
     @ViewBuilder
     private func taskCard(for task: TaskModel) -> some View {
         HStack(spacing: 16) {
-            MatrixGridIcon(mode: getMode(from: task.priority))
+            MatrixGridBadge(mode: getMode(fromPriority: task.priority))
                 .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: 4) {

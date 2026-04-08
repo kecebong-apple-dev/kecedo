@@ -260,7 +260,7 @@ struct AddTaskView: View {
             task.endDate = endDate
             task.priority = matrix
         } else {
-            let newTask: TaskModel = TaskModel(title: title, desc: desc, startDate: startDate, endDate: endDate, priority: matrix)
+            let newTask: TaskModel = TaskModel(title: title, desc: desc, startDate: startDate, endDate: endDate, priority: matrix, isDone: false)
             modelContext.insert(newTask)
         }
         
