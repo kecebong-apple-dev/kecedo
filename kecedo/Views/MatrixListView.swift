@@ -86,7 +86,7 @@ struct MatrixListView: View {
     
     var body: some View {
         ZStack {
-            Color(UIColor.systemGroupedBackground)
+            Color(UIColor.systemGroupedBackground) 
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
