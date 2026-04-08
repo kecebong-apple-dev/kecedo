@@ -85,60 +85,7 @@ struct MatrixGridBadge: View {
     }
 }
 
-private struct TopBar: View {
-    let onSettings: () -> Void
-    let onLayout: () -> Void
-    let onSwitch: () -> Void
-    let onAdd: () -> Void
-    
-    var body: some View {
-        HStack {
-            Button(action: onSettings) {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 20))
-                    .foregroundColor(.primary)
-                    .frame(width: 44, height: 44)
-                    .background(Color.white)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
-            }
-            
-            Spacer()
-            
-            HStack(spacing: 12) {
-                HStack(spacing: 20) {
-                    Button(action: onLayout) {
-                        Image(systemName: "line.3.horizontal.circle")
-                            .font(.system(size: 20))
-                            .foregroundColor(.primary)
-                    }
-                    Button(action: onSwitch) {
-                        Image(systemName: "rectangle.2.swap")
-                            .font(.system(size: 18))
-                            .foregroundColor(.primary)
-                    }
-                }
-                .padding(.horizontal, 20)
-                .frame(height: 44)
-                .background(Color.white)
-                .clipShape(Capsule())
-                .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
-                
-                Button(action: onAdd) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 20))
-                        .foregroundColor(.primary)
-                        .frame(width: 44, height: 44)
-                        .background(Color.white)
-                        .clipShape(Circle())
-                        .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
-                }
-            }
-        }
-        .padding(.horizontal)
-        .padding(.top, 10)
-    }
-}
+// TopBar struct removed to use standard .toolbarMain
 
 private struct ModeSelector: View {
     let selected: MatrixMode
@@ -256,13 +203,20 @@ struct MatrixListView: View {
     
     @Query(sort: \TaskModel.endDate) private var tasks: [TaskModel]
     
+    var filterState: MatrixFilterState = MatrixFilterState()
+    var onSettings: () -> Void = {}
+    var onFilter: () -> Void = {}
+    var onSwap: () -> Void = {}
+    
+    @State private var showingAddTask = false
     @State private var selectedMode: MatrixMode = .all
     
     private var filteredTasks: [TaskModel] {
+        let baseTasks = tasks.applying(filter: filterState)
         if let p = selectedMode.priority {
-            return tasks.filter { $0.priority == p }
+            return baseTasks.filter { $0.priority == p }
         } else {
-            return tasks
+            return baseTasks
         }
     }
     
@@ -281,7 +235,6 @@ struct MatrixListView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                TopBar(onSettings: {}, onLayout: {}, onSwitch: {}, onAdd: {})
                 
                 Text("Matrix")
                     .font(.system(size: 34, weight: .bold))
@@ -314,6 +267,17 @@ struct MatrixListView: View {
                         .padding(.bottom, 100)
                     }
                 }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarMain(
+                items: .matrix,
+                showingAddTask: $showingAddTask,
+                onSettings: onSettings,
+                onFilter: onFilter,
+                onSwap: onSwap
+            )
+            .sheet(isPresented: $showingAddTask) {
+                AddTaskView()
             }
         }
     }
