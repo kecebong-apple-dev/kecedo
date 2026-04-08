@@ -17,14 +17,16 @@ class TaskModel: Identifiable {
     var startDate: Date
     var endDate: Date
     var priority: Priority
+    var isDone: Bool
     
-    init(id: UUID = UUID(), title: String, desc: String, startDate: Date, endDate: Date, priority: Priority) {
+    init(id: UUID = UUID(), title: String, desc: String, startDate: Date, endDate: Date, priority: Priority, isDone: Bool) {
         self.id = id
         self.title = title
         self.desc = desc
         self.startDate = startDate
         self.endDate = endDate
         self.priority = priority
+        self.isDone = isDone
     }
     
     static var dummyTasks: [TaskModel] {
