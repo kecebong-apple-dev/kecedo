@@ -14,7 +14,7 @@ private struct QuadrantCellView: View {
     let priority: Priority
     let tasks: [TaskModel]
     let onToggle: (TaskModel) -> Void
-
+    
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(alignment: .leading, spacing: 0) {
@@ -44,13 +44,13 @@ private struct TaskRowView: View {
     let task: TaskModel
     let priority: Priority
     let onToggle: () -> Void
-
+    
     private var dateText: String {
         let f = DateFormatter()
         f.dateFormat = "MMM d, h:mm a"
         return f.string(from: task.endDate)
     }
-
+    
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
@@ -78,24 +78,24 @@ private struct TaskRowView: View {
 // MARK: - Matrix View
 
 struct MatrixView: View {
-
+    
     // Fetch all tasks from SwiftData; sort by endDate ascending
     @Query(sort: \TaskModel.endDate) private var allTasks: [TaskModel]
     @Environment(\.modelContext) private var context
-
+    
     @State private var showingAddTask = false
-
+    
     private let columnLabels = ["Urgent", "Not Urgent"]
-
+    
     // Helper: filter tasks per priority quadrant
     private func tasks(for priority: Priority) -> [TaskModel] {
         allTasks.filter { $0.priority == priority }
     }
-
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-
+                
                 // ── Manual large title (inline nav bar = no UIKit scroll hijack) ──
                 HStack {
                     Text("Matrix")
@@ -106,7 +106,7 @@ struct MatrixView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 4)
                 .padding(.bottom, 4)
-
+                
                 // ── Grid ──────────────────────────────────────────────────────────
                 GeometryReader { geo in
                     let hPad:    CGFloat = 12
@@ -115,9 +115,9 @@ struct MatrixView: View {
                     let headerH: CGFloat = 30
                     let cellH = (geo.size.height - headerH - gap) / 2
                     let cellW = (geo.size.width  - hPad * 2 - labelW - gap) / 2
-
+                    
                     VStack(spacing: 0) {
-
+                        
                         // Column headers
                         HStack(spacing: 0) {
                             Color.clear.frame(width: labelW)
@@ -130,17 +130,17 @@ struct MatrixView: View {
                         }
                         .frame(height: headerH)
                         .padding(.horizontal, hPad)
-
+                        
                         // 2×2 quadrants
                         HStack(alignment: .top, spacing: 0) {
-
+                            
                             // Row labels
                             VStack(spacing: gap) {
                                 rowLabel("Important",     height: cellH)
                                 rowLabel("Not Important", height: cellH)
                             }
                             .frame(width: labelW)
-
+                            
                             // Cells
                             VStack(spacing: gap) {
                                 HStack(spacing: gap) {
@@ -150,7 +150,7 @@ struct MatrixView: View {
                                         onToggle: deleteTask
                                     )
                                     .frame(width: cellW, height: cellH)
-
+                                    
                                     QuadrantCellView(
                                         priority: .schedule,
                                         tasks: tasks(for: .schedule),
@@ -165,7 +165,7 @@ struct MatrixView: View {
                                         onToggle: deleteTask
                                     )
                                     .frame(width: cellW, height: cellH)
-
+                                    
                                     QuadrantCellView(
                                         priority: .eliminate,
                                         tasks: tasks(for: .eliminate),
@@ -185,21 +185,26 @@ struct MatrixView: View {
                 ToolbarItem(placement: .principal) {
                     Color.clear // hide the inline centre title
                 }
+                
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button { } label: {
                         Image(systemName: "gearshape")
                             .foregroundColor(.primary)
                     }
                 }
+
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button { } label: {
-                        Image(systemName: "list.bullet")
+                        Image(systemName: "line.3.horizontal.decrease.circle")
                             .foregroundColor(.primary)
                     }
                     Button { } label: {
-                        Image(systemName: "square.on.square")
+                        Image(systemName: "rectangle.2.swap")
                             .foregroundColor(.primary)
                     }
+                }
+
+                ToolbarItem(placement: .primaryAction) {
                     Button { showingAddTask = true } label: {
                         Image(systemName: "plus")
                             .foregroundColor(.primary)
@@ -211,9 +216,9 @@ struct MatrixView: View {
             }
         }
     }
-
+    
     // MARK: - Helpers
-
+    
     @ViewBuilder
     private func rowLabel(_ text: String, height: CGFloat) -> some View {
         Text(text)
@@ -224,7 +229,7 @@ struct MatrixView: View {
             .frame(width: 28, height: height)
             .clipped()
     }
-
+    
     private func deleteTask(_ task: TaskModel) {
         context.delete(task)
     }
@@ -235,13 +240,13 @@ struct MatrixView: View {
 private struct AddTaskSheet: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
-
+    
     @State private var title = ""
     @State private var desc = ""
     @State private var startDate = Date()
     @State private var endDate = Date().addingTimeInterval(3600)
     @State private var priority: Priority = .doFirst
-
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -291,6 +296,15 @@ private struct AddTaskSheet: View {
 // MARK: - Preview
 
 #Preview {
-    MatrixView()
-        .modelContainer(for: TaskModel.self, inMemory: true)
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: TaskModel.self, configurations: config)
+    
+    // 1. Loop through your dummy data
+    for task in TaskModel.dummyTasks {
+        // 2. Insert them into the preview's database
+        container.mainContext.insert(task)
+    }
+    
+    return MatrixView()
+        .modelContainer(container) // 3. Pass the populated container
 }
