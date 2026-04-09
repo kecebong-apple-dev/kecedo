@@ -20,24 +20,25 @@ extension DateFormatter {
 
 // TopBar struct removed to use standard .toolbarMain
 
-private struct ModeSelector: View {
-    let selected: MatrixMode
-    let onSelect: (MatrixMode) -> Void
+/// A horizontal selector for picking a matrix priority filter
+private struct PrioritySelector: View {
+    let selected: Priority
+    let onSelect: (Priority) -> Void
     
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(MatrixMode.allCases, id: \.self) { mode in
+            ForEach(Priority.allCases, id: \.self) { priority in
                 Button {
                     withAnimation {
-                        onSelect(mode)
+                        onSelect(priority)
                     }
                 } label: {
                     ZStack {
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(mode.tint(forSelected: mode == selected))
+                            .fill(backgroundColor(for: priority, isSelected: priority == selected))
                             .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
                         
-                        MatrixGridBadge(mode: mode)
+                        MatrixGridBadge(priority: priority)
                             .frame(width: 28, height: 28)
                     }
                     .frame(width: 60, height: 60)
@@ -47,9 +48,19 @@ private struct ModeSelector: View {
         }
         .padding(.horizontal)
     }
+    
+    /// Determines the background color based on selection and priority
+    private func backgroundColor(for priority: Priority, isSelected: Bool) -> Color {
+        guard isSelected else { return .white }
+        
+        // Special handling for '.all' since its default secondary hex is completely black
+//        if priority == .all {
+//            return .gray.opacity(0.15)
+//        }
+        
+        return priority.color.secondary
+    }
 }
-
-
 
 // MARK: - Main View
 
@@ -64,13 +75,13 @@ struct MatrixListView: View {
     var onSwap: () -> Void = {}
     
     @State private var showingAddTask = false
-    @State private var selectedMode: MatrixMode = .all
+    @State private var selectedPriority: Priority = .all
     @State private var selectedTask: TaskModel? = nil
     
     private var filteredTasks: [TaskModel] {
         let baseTasks = tasks.applying(filter: filterState)
-        if let p = selectedMode.priority {
-            return baseTasks.filter { $0.priority == p }
+        if selectedPriority != .all {
+            return baseTasks.filter { $0.priority == selectedPriority }
         } else {
             return baseTasks
         }
@@ -81,7 +92,8 @@ struct MatrixListView: View {
     var body: some View {
         VStack(spacing: 0) {
             
-            // ── Manual large title (inline nav bar = no UIKit scroll hijack) ──
+            // Manual large title used alongside inline nav bar 
+            // to prevent default UIKit scroll hijacking behaviors
             HStack {
                 Text("Matrix")
                     .font(.largeTitle)
@@ -94,7 +106,7 @@ struct MatrixListView: View {
             
             ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
-                        ModeSelector(selected: selectedMode, onSelect: { selectedMode = $0 })
+                        PrioritySelector(selected: selectedPriority, onSelect: { selectedPriority = $0 })
                         
                         Text("Today")
                             .font(.title2)
@@ -104,7 +116,7 @@ struct MatrixListView: View {
                         LazyVStack(spacing: 12) {
                             ForEach(filteredTasks) { task in
                                 TaskRow(task: task,
-                                        iconMode: MatrixMode.mode(from: task.priority),
+                                        iconMode: task.priority,
                                         onToggle: {
                                             withAnimation {
                                                 task.isDone.toggle()
@@ -131,8 +143,8 @@ struct MatrixListView: View {
             .sheet(isPresented: $showingAddTask) {
                 AddTaskView()
             }
-            // Edit existing task — use .sheet(item:) so it re-opens correctly
-            // when tapping different tasks back-to-back
+            // Edit an existing task. We use .sheet(item:) to ensure the sheet
+            // correctly re-renders when tapping different tasks sequentially.
             .sheet(item: $selectedTask) { task in
                 AddTaskView(taskToEdit: task)
             }
@@ -153,7 +165,7 @@ let previewContainer: ModelContainer = {
         }
         return container
     } catch {
-        fatalError("Gagal membuat preview container: \(error)")
+        fatalError("Failed to create preview container: \(error)")
     }
 }()
 

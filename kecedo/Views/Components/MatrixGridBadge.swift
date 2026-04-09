@@ -9,29 +9,29 @@ import Foundation
 import SwiftUI
 
 struct MatrixGridBadge: View {
-    var mode: MatrixMode
+    var priority: Priority
     
     var body: some View {
         VStack(spacing: 3) {
             HStack(spacing: 3) {
-                quadrantSquare(for: .urgentImportant, color: Priority.doFirst.color.primary)
-                quadrantSquare(for: .notUrgentImportant, color: Priority.schedule.color.primary)
+                quadrantSquare(for: Priority.doFirst)
+                quadrantSquare(for: Priority.schedule)
             }
             HStack(spacing: 3) {
-                quadrantSquare(for: .urgentNotImportant, color: Priority.delegate.color.primary)
-                quadrantSquare(for: .notUrgentNotImportant, color: Priority.eliminate.color.primary)
+                quadrantSquare(for: Priority.delegate)
+                quadrantSquare(for: Priority.eliminate)
             }
         }
     }
     
     @ViewBuilder
-    private func quadrantSquare(for targetMode: MatrixMode, color: Color) -> some View {
-        if mode == .all {
+    private func quadrantSquare(for targetMode: Priority) -> some View {
+        if priority == .all {
             RoundedRectangle(cornerRadius: 3)
-                .fill(color)
-        } else if mode == targetMode {
+                .fill(targetMode.color.primary)
+        } else if priority == targetMode {
             RoundedRectangle(cornerRadius: 3)
-                .stroke(color, lineWidth: 2)
+                .stroke(targetMode.color.primary, lineWidth: 2)
                 .background(RoundedRectangle(cornerRadius: 3).fill(Color.clear))
         } else {
             RoundedRectangle(cornerRadius: 3)

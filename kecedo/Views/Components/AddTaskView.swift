@@ -110,39 +110,30 @@ struct AddTaskView: View {
                     
                     Text("Matrix Area").fontWeight(.bold).font(.title2).padding(.horizontal, 16).padding(.top, 6)
                     HStack {
-                        Button {
-                            matrix = .doFirst
-                        } label: {
-                            MatrixGridIcon(mode: .doFirst)
-                                .frame(width: 36, height: 36)
+                        ForEach([Priority.doFirst, Priority.schedule, Priority.delegate, Priority.eliminate], id: \.self) { priority in
+                            Button {
+                                withAnimation {
+                                    matrix = priority
+                                }
+                            } label: {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(matrix == priority ? priority.color.secondary : .white)
+                                        .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
+                                    
+                                    MatrixGridBadge(priority: priority)
+                                        .frame(width: 28, height: 28)
+                                }
+                                .frame(width: 60, height: 60)
+                            }
+                            .buttonStyle(.plain)
+                            
+                            if priority != .eliminate {
+                                Spacer()
+                            }
                         }
-                        .gridIconStyle(isActive: matrix == .doFirst)
-                        Spacer()
-                        Button {
-                            matrix = .schedule
-                        } label: {
-                            MatrixGridIcon(mode: .schedule)
-                                .frame(width: 36, height: 36)
-                        }
-                        .gridIconStyle(isActive: matrix == .schedule)
-                        Spacer()
-                        Button {
-                            matrix = .delegate
-                        } label: {
-                            MatrixGridIcon(mode: .delegate)
-                                .frame(width: 36, height: 36)
-                        }
-                        .gridIconStyle(isActive: matrix == .delegate)
-                        Spacer()
-                        Button {
-                            matrix = .eliminate
-                        } label: {
-                            MatrixGridIcon(mode: .eliminate)
-                                .frame(width: 36, height: 36)
-                        }
-                        .gridIconStyle(isActive: matrix == .eliminate)
                     }
-                    .padding(.horizontal, 36)
+                    .padding(.horizontal, 32)
                     
                     if taskToEdit != nil {
                         Button {
