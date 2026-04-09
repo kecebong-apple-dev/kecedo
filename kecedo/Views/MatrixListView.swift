@@ -62,95 +62,6 @@ private struct PrioritySelector: View {
     }
 }
 
-/// An individual row representing a task, displaying its matrix badge and deadline status
-private struct TaskRow: View {
-    let task: TaskModel
-    let onToggle: () -> Void
-    let onTap: () -> Void
-    
-    /// Determines the display text, text color, and icon based on task deadline and status
-    private var statusInfo: (text: String, color: Color, icon: String?) {
-        let dateString = DateFormatter.matrixTime.string(from: task.endDate)
-        
-        // Display neutral gray if the task is already completed
-        if task.isDone {
-            return (dateString, .gray, nil)
-        }
-        
-        let timeInterval = task.endDate.timeIntervalSinceNow
-        
-        if timeInterval < 0 {
-            // Task is overdue
-            return ("Overdue - \(dateString)", Priority.eliminate.color.primary, "exclamationmark.circle.fill")
-        } else if timeInterval < 86400 {
-            // Task is due in less than 24 hours
-            let hours = Int(timeInterval / 3600)
-            let hourText = hours > 0 ? "Due in \(hours) \(hours == 1 ? "hour" : "hours")" : "Due in less than an hour"
-            return ("\(hourText) - \(dateString)", Priority.schedule.color.primary, "alarm.fill")
-        } else {
-            // Normal state (more than 24 hours remaining)
-            return (dateString, .gray, nil)
-        }
-    }
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            MatrixGridBadge(priority: task.priority)
-                .frame(width: 24, height: 24)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(task.title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(task.isDone ? .gray : .primary)
-                    .strikethrough(task.isDone, color: .gray)
-                    .lineLimit(1) // Truncate long task titles with "..."
-                
-                let status = statusInfo
-                HStack(spacing: 4) {
-                    if let icon = status.icon {
-                        Image(systemName: icon)
-                    }
-                    Text(status.text)
-                }
-                .font(.system(size: 13, weight: status.icon != nil ? .medium : .regular))
-                .foregroundColor(status.color)
-            }
-            
-            Spacer(minLength: 12) // pushes the content to the left to avoid overlapping the button
-            
-            toggleButton
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.04), radius: 5, y: 2)
-        .contentShape(Rectangle())
-        .onTapGesture { onTap() }
-    }
-    
-    /// The circular toggle button for changing task completion status
-    private var toggleButton: some View {
-        Button(action: onToggle) {
-            ZStack {
-                Circle()
-                    .stroke(task.isDone ? Color.clear : Color.gray.opacity(0.4), lineWidth: 1.5)
-                    .frame(width: 28, height: 28)
-                
-                if task.isDone {
-                    Circle()
-                        .fill(task.priority.color.primary)
-                        .frame(width: 28, height: 28)
-                    
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
-                }
-            }
-        }
-        .buttonStyle(.plain)
-    }
-}
-
 // MARK: - Main View
 
 struct MatrixListView: View {
@@ -205,7 +116,7 @@ struct MatrixListView: View {
                         LazyVStack(spacing: 12) {
                             ForEach(filteredTasks) { task in
                                 TaskRow(task: task,
-                                        iconMode: MatrixMode.mode(from: task.priority),
+                                        iconMode: task.priority,
                                         onToggle: {
                                             withAnimation {
                                                 task.isDone.toggle()
