@@ -8,6 +8,10 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
+    @AppStorage("appFontSize") private var appFontSize: Int = 14
+    @AppStorage("appIsLightMode") private var appIsLightMode: Bool = true
+    
     // Current state
     @State private var language: String = "English"
     @State private var fontSize: Int = 14
@@ -41,6 +45,7 @@ struct SettingsView: View {
                     Menu {
                         Button("English") { language = "English" }
                         Button("Indonesian") { language = "Indonesian" }
+                        Button("Chinese") { language = "Chinese" }
                     } label: {
                         HStack(spacing: 4) {
                             Text(language)
@@ -59,6 +64,11 @@ struct SettingsView: View {
                 HStack {
                     Text("Font Size")
                     Spacer()
+                    
+                    Text("\(fontSize)")
+                        .foregroundColor(.gray)
+                        .padding(.trailing, 8)
+                        
                     HStack(spacing: 0) {
                         Button {
                             if fontSize > 10 { fontSize -= 1 }
@@ -119,6 +129,14 @@ struct SettingsView: View {
         }
         .padding()
         .background(Color(UIColor.systemGroupedBackground).ignoresSafeArea())
+        .onAppear {
+            language = appLanguage
+            initialLanguage = appLanguage
+            fontSize = appFontSize
+            initialFontSize = appFontSize
+            isLightMode = appIsLightMode
+            initialIsLightMode = appIsLightMode
+        }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
@@ -145,6 +163,10 @@ struct SettingsView: View {
                 initialLanguage = language
                 initialFontSize = fontSize
                 initialIsLightMode = isLightMode
+                
+                appLanguage = language
+                appFontSize = fontSize
+                appIsLightMode = isLightMode
             }
         } message: {
             Text("Are you sure you want to apply these changes?")
