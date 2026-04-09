@@ -162,7 +162,7 @@ struct FilteredTaskListView: View {
             } else {
                 ForEach(tasks) { task in
                     TaskRow(task: task,
-                            iconMode: MatrixMode.mode(from: task.priority),
+                            iconMode: task.priority,
                             onToggle: {
                                 withAnimation {
                                     task.isDone.toggle()

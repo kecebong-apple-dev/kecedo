@@ -10,7 +10,7 @@ import SwiftUI
 
 struct TaskRow: View {
     let task: TaskModel
-    let iconMode: MatrixMode
+    let iconMode: Priority
     let onToggle: () -> Void
     var onTap: (() -> Void)? = nil
     
@@ -40,7 +40,7 @@ struct TaskRow: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            MatrixGridBadge(mode: iconMode)
+            MatrixGridBadge(priority: iconMode)
                 .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: 4) {
