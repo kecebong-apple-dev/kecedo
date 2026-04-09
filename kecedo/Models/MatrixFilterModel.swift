@@ -2,6 +2,8 @@
 //  MatrixFilterModel.swift
 //  kecedo
 //
+//  Created by Nathan Gitu Loh on 06/04/26.
+//
 
 import Foundation
 
@@ -24,6 +26,7 @@ struct MatrixFilterState: Equatable {
 extension Array where Element == TaskModel {
     func applying(filter: MatrixFilterState) -> [TaskModel] {
         self.filter { task in
+            
             // Filter by completion status
             if !filter.showCompleted && task.isDone { return false }
             
@@ -35,15 +38,12 @@ extension Array where Element == TaskModel {
             case .today:
                 return calendar.isDateInToday(task.endDate)
             case .week:
-                // Assuming "Week" means this current week. Or rolling 7 days.
-                // Let's use current week
                 if let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())),
                    let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek) {
                     return task.endDate >= startOfWeek && task.endDate < endOfWeek
                 }
                 return true
             case .period:
-                // Truncate start and end times to bounds of the day if needed
                 let start = calendar.startOfDay(for: filter.startDate)
                 let end = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: filter.endDate)) ?? filter.endDate
                 return task.endDate >= start && task.endDate < end

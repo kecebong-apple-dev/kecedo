@@ -19,7 +19,31 @@ struct StatisticsView: View {
     }
     
     private var tasksCompletedToday: Int {
-        completedTasks.filter { Calendar.current.isDateInToday($0.endDate) }.count
+        completedTasks.filter { task in
+            if let completedAt = task.completedAt {
+                return Calendar.current.isDateInToday(completedAt)
+            }
+            return Calendar.current.isDateInToday(task.endDate)
+        }.count
+    }
+    
+    private var progressCardTexts: (title: String, subtitle: String, description: String) {
+        let completed = tasksCompletedToday
+        let toComplete = tasks.filter { !$0.isDone }.count
+        
+        if completed == 0 {
+            if toComplete > 0 {
+                return ("Ready to start?", "Let's get things moving.", "You have \(toComplete) tasks ready to go.")
+            } else {
+                return ("All Caught Up", "No tasks on your plate.", "Enjoy your day!")
+            }
+        } else if completed == 1 {
+            return ("Great Start!", "Good job getting started.", "You completed 1 task today.")
+        } else if completed <= 3 {
+            return ("Nice Progress", "Keep up the good work!", "You completed \(completed) tasks today.")
+        } else {
+            return ("Excellent Work", "You're crushing it today.", "You completed \(completed) tasks today.")
+        }
     }
 
     var body: some View {
@@ -99,37 +123,36 @@ struct StatisticsView: View {
                         .foregroundStyle(Color(hex: "#1F1F1F"))
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, 18)
+                .padding(.horizontal, 8)
                 .background(priority.color.secondary, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
         }
     }
 
     private var progressCard: some View {
-        HStack(alignment: .top, spacing: 12) {
+        let texts = progressCardTexts
+        
+        return HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Nice Progress!")
+                Text(texts.title)
                     .font(.system(size: 14, weight: .bold))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color(hex: "#F4F4F4"), in: Capsule())
 
-                Text("You're on track!")
+                Text(texts.subtitle)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(Color(hex: "#202020"))
 
-                Text("You completed \(tasksCompletedToday) tasks today.")
+                Text(texts.description)
                     .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(Color(hex: "#4A4A4A"))
-
-                Text("Keep focusing on what matters!")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.secondary.opacity(0.9))
             }
 
             Spacer(minLength: 0)
         }
-        .padding(12)
+        .padding(16)
         .background(.white.opacity(0.97), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .shadow(color: .black.opacity(0.05), radius: 18, y: 10)
     }

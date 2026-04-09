@@ -162,7 +162,7 @@ struct FilteredTaskListView: View {
                             iconMode: task.priority,
                             onToggle: {
                                 withAnimation {
-                                    task.isDone.toggle()
+                                    task.toggleDone()
                                 }
                             },
                             onTap: {

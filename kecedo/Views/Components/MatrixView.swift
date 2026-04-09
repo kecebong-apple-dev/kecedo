@@ -62,10 +62,11 @@ private struct TaskRowView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(task.isDone ? Color(.systemGray3) : .primary)
                     .strikethrough(task.isDone, color: Color(.systemGray3))
-                    .lineLimit(2)
-                Text(dateText)
+                    .lineLimit(1)
+                Text("\(Image(systemName: "alarm.fill")) \(dateText)")
                     .font(.system(size: 11))
                     .foregroundColor(task.isDone ? Color(.systemGray4) : .secondary)
+                    .lineLimit(1)
             }
             Spacer()
             // Completion circle — toggle by tapping
@@ -205,6 +206,7 @@ struct MatrixView: View {
                     }
                 }
             }
+            .padding(.bottom, 10)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarMain(
                 items: .matrix,
@@ -217,8 +219,7 @@ struct MatrixView: View {
             .sheet(isPresented: $showingAddTask) {
                 AddTaskView()
             }
-            // Edit existing task — use .sheet(item:) so it re-opens correctly
-            // when tapping different tasks back-to-back
+            // Edit existing task
             .sheet(item: $selectedTask) { task in
                 AddTaskView(taskToEdit: task)
             }
@@ -238,7 +239,7 @@ struct MatrixView: View {
     }
 
     private func toggleDone(_ task: TaskModel) {
-        task.isDone.toggle()
+        task.toggleDone()
     }
 }
 
