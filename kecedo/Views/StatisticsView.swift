@@ -25,17 +25,6 @@ struct StatisticsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-//                LinearGradient(
-//                    colors: [
-//                        Color.white,
-//                        Color(hex: "#FBF5F0"),
-//                        Color(hex: "#F6F7FB")
-//                    ],
-//                    startPoint: .topLeading,
-//                    endPoint: .bottomTrailing
-//                )
-//                .ignoresSafeArea()
-
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 12) {
                         overviewCard
