@@ -25,16 +25,16 @@ struct StatisticsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // LinearGradient(
-                //     colors: [
-                //         Color.white,
-                //         Color(hex: "#FBF5F0"),
-                //         Color(hex: "#F6F7FB")
-                //     ],
-                //     startPoint: .topLeading,
-                //     endPoint: .bottomTrailing
-                // )
-                // .ignoresSafeArea()
+//                LinearGradient(
+//                    colors: [
+//                        Color.white,
+//                        Color(hex: "#FBF5F0"),
+//                        Color(hex: "#F6F7FB")
+//                    ],
+//                    startPoint: .topLeading,
+//                    endPoint: .bottomTrailing
+//                )
+//                .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 12) {
@@ -75,7 +75,7 @@ struct StatisticsView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .frame(height: 235)
             } else {
-                Chart(Priority.allCases) { priority in
+                Chart(Priority.allCases.filter { $0 != .all }) { priority in
                     let count = completedTasks.filter { $0.priority == priority }.count
                     
                     SectorMark(
@@ -98,11 +98,11 @@ struct StatisticsView: View {
 
     private var countCards: some View {
         HStack(spacing: 10) {
-            ForEach(Priority.allCases) { priority in
+            ForEach(Priority.allCases.filter { $0 != .all }) { priority in
                 let count = completedTasks.filter { $0.priority == priority }.count
                 
                 HStack(spacing: 8) {
-                    MatrixGridBadge(mode: MatrixMode.mode(from: priority))
+                    MatrixGridBadge(priority: priority)
                         .frame(width: 22, height: 22)
 
                     Text("\(count)")

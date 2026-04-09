@@ -30,6 +30,12 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
-        .modelContainer(for: TaskModel.self, inMemory: true)
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: TaskModel.self, configurations: config)
+
+    for task in TaskModel.dummyTasks {
+        container.mainContext.insert(task)
+    }
+    return ContentView()
+        .modelContainer(container)
 }
