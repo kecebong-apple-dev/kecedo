@@ -21,7 +21,7 @@ struct ContentView: View {
                 .tabItem {
                 Label("Calendar", systemImage: "calendar")
             }
-            Text("Statistics")
+            Statistics()
             .tabItem {
                 Label("Statistics", systemImage: "chart.bar")
             }
