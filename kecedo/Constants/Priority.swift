@@ -14,7 +14,7 @@ struct MultiColor {
 }
 
 enum Priority: String, Codable, Identifiable, CaseIterable {
-    case doFirst, schedule, delegate, eliminate
+    case all, doFirst, schedule, delegate, eliminate
     
     var id: String {
         self.rawValue
@@ -22,6 +22,7 @@ enum Priority: String, Codable, Identifiable, CaseIterable {
     
     var name: String {
         switch self {
+        case .all: return "All"
         case .doFirst:   return "Do First"
         case .schedule:  return "Schedule"
         case .delegate:  return "Delegate"
@@ -31,6 +32,7 @@ enum Priority: String, Codable, Identifiable, CaseIterable {
     
     var color: MultiColor {
         switch self {
+        case .all:       return MultiColor(primary: Color(hex: "#181D33"), secondary: Color(hex: "#E3E3E3"))
         case .doFirst:   return MultiColor(primary: Color(hex: "#33C65B"), secondary: Color(hex: "#E2FFEA"))
         case .schedule:  return MultiColor(primary: Color(hex: "#FFCC01"), secondary: Color(hex: "#FFF6D2"))
         case .delegate:  return MultiColor(primary: Color(hex: "#29B9FF"), secondary: Color(hex: "#CFEFFF"))

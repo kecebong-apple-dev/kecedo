@@ -10,36 +10,7 @@ import SwiftData
 
 // MARK: - Types
 
-enum MatrixMode: CaseIterable, Equatable {
-    case all
-    case urgentImportant
-    case notUrgentImportant
-    case urgentNotImportant
-    case notUrgentNotImportant
-    
-    // Mapping MatrixMode ke Priority
-    var priority: Priority? {
-        switch self {
-        case .all: return nil
-        case .urgentImportant: return .doFirst
-        case .notUrgentImportant: return .schedule
-        case .urgentNotImportant: return .delegate
-        case .notUrgentNotImportant: return .eliminate
-        }
-    }
-    
-    func tint(forSelected isSelected: Bool) -> Color {
-        guard isSelected else { return .white }
-        switch self {
-        case .all: return .gray.opacity(0.15)
-        default:
-            if let priority = priority {
-                return priority.color.secondary.opacity(0.25)
-            }
-            return .white
-        }
-    }
-}
+// MatrixMode has been replaced by Priority from Constants
 
 // MARK: - Extensions / Helpers
 
@@ -53,32 +24,39 @@ extension DateFormatter {
 
 // MARK: - Subviews
 
+/// A visual badge representing the 4-quadrant Eisenhower Matrix.
+/// Selected quadrants are highlighted based on the provided priority.
 struct MatrixGridBadge: View {
-    var mode: MatrixMode
+    let priority: Priority
     
     var body: some View {
         VStack(spacing: 3) {
             HStack(spacing: 3) {
-                quadrantSquare(for: .urgentImportant, color: Priority.doFirst.color.primary)
-                quadrantSquare(for: .notUrgentImportant, color: Priority.schedule.color.primary)
+                quadrantSquare(for: .doFirst, color: Priority.doFirst.color.primary)
+                quadrantSquare(for: .schedule, color: Priority.schedule.color.primary)
             }
             HStack(spacing: 3) {
-                quadrantSquare(for: .urgentNotImportant, color: Priority.delegate.color.primary)
-                quadrantSquare(for: .notUrgentNotImportant, color: Priority.eliminate.color.primary)
+                quadrantSquare(for: .delegate, color: Priority.delegate.color.primary)
+                quadrantSquare(for: .eliminate, color: Priority.eliminate.color.primary)
             }
         }
     }
     
+    /// Generates a single square within the matrix grid.
+    /// Highlights the square if it matches the current priority.
     @ViewBuilder
-    private func quadrantSquare(for targetMode: MatrixMode, color: Color) -> some View {
-        if mode == .all {
+    private func quadrantSquare(for targetPriority: Priority, color: Color) -> some View {
+        if priority == .all {
+            // Fill all quadrants if the selected priority is 'all'
             RoundedRectangle(cornerRadius: 3)
                 .fill(color)
-        } else if mode == targetMode {
+        } else if priority == targetPriority {
+            // Outline and highlight the specific target quadrant
             RoundedRectangle(cornerRadius: 3)
                 .stroke(color, lineWidth: 2)
                 .background(RoundedRectangle(cornerRadius: 3).fill(Color.clear))
         } else {
+            // Dim non-matching quadrants
             RoundedRectangle(cornerRadius: 3)
                 .stroke(Color.gray.opacity(0.3), lineWidth: 1.5)
         }
@@ -87,24 +65,25 @@ struct MatrixGridBadge: View {
 
 // TopBar struct removed to use standard .toolbarMain
 
-private struct ModeSelector: View {
-    let selected: MatrixMode
-    let onSelect: (MatrixMode) -> Void
+/// A horizontal selector for picking a matrix priority filter
+private struct PrioritySelector: View {
+    let selected: Priority
+    let onSelect: (Priority) -> Void
     
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(MatrixMode.allCases, id: \.self) { mode in
+            ForEach(Priority.allCases, id: \.self) { priority in
                 Button {
                     withAnimation {
-                        onSelect(mode)
+                        onSelect(priority)
                     }
                 } label: {
                     ZStack {
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(mode.tint(forSelected: mode == selected))
+                            .fill(backgroundColor(for: priority, isSelected: priority == selected))
                             .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
                         
-                        MatrixGridBadge(mode: mode)
+                        MatrixGridBadge(priority: priority)
                             .frame(width: 28, height: 28)
                     }
                     .frame(width: 60, height: 60)
@@ -114,19 +93,31 @@ private struct ModeSelector: View {
         }
         .padding(.horizontal)
     }
+    
+    /// Determines the background color based on selection and priority
+    private func backgroundColor(for priority: Priority, isSelected: Bool) -> Color {
+        guard isSelected else { return .white }
+        
+        // Special handling for '.all' since its default secondary hex is completely black
+//        if priority == .all {
+//            return .gray.opacity(0.15)
+//        }
+        
+        return priority.color.secondary
+    }
 }
 
+/// An individual row representing a task, displaying its matrix badge and deadline status
 private struct TaskRow: View {
     let task: TaskModel
-    let iconMode: MatrixMode
     let onToggle: () -> Void
     let onTap: () -> Void
     
-    // Logika untuk menentukan teks, warna, dan ikon berdasarkan waktu tenggat
+    /// Determines the display text, text color, and icon based on task deadline and status
     private var statusInfo: (text: String, color: Color, icon: String?) {
         let dateString = DateFormatter.matrixTime.string(from: task.endDate)
         
-        // Jika tugas sudah selesai, tampilkan abu-abu netral
+        // Display neutral gray if the task is already completed
         if task.isDone {
             return (dateString, .gray, nil)
         }
@@ -134,21 +125,22 @@ private struct TaskRow: View {
         let timeInterval = task.endDate.timeIntervalSinceNow
         
         if timeInterval < 0 {
-            // Overdue (Lebih dari batas waktu) -> Merah
-            return ("Overdue - \(dateString)", .red, "exclamationmark.circle.fill")
-        } else if timeInterval < 86400 { // Kurang dari 24 Jam -> Oranye
+            // Task is overdue
+            return ("Overdue - \(dateString)", Priority.eliminate.color.primary, "exclamationmark.circle.fill")
+        } else if timeInterval < 86400 {
+            // Task is due in less than 24 hours
             let hours = Int(timeInterval / 3600)
             let hourText = hours > 0 ? "Due in \(hours) \(hours == 1 ? "hour" : "hours")" : "Due in less than an hour"
-            return ("\(hourText) - \(dateString)", .orange, "alarm.fill")
+            return ("\(hourText) - \(dateString)", Priority.schedule.color.primary, "alarm.fill")
         } else {
-            // Normal -> Abu-abu
+            // Normal state (more than 24 hours remaining)
             return (dateString, .gray, nil)
         }
     }
     
     var body: some View {
         HStack(spacing: 16) {
-            MatrixGridBadge(mode: iconMode)
+            MatrixGridBadge(priority: task.priority)
                 .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: 4) {
@@ -156,7 +148,7 @@ private struct TaskRow: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(task.isDone ? .gray : .primary)
                     .strikethrough(task.isDone, color: .gray)
-                    .lineLimit(1) // Memotong teks panjang menjadi "..."
+                    .lineLimit(1) // Truncate long task titles with "..."
                 
                 let status = statusInfo
                 HStack(spacing: 4) {
@@ -169,26 +161,9 @@ private struct TaskRow: View {
                 .foregroundColor(status.color)
             }
             
-            Spacer(minLength: 12) // Mendorong teks ke kiri agar tidak menabrak tombol
+            Spacer(minLength: 12) // pushes the content to the left to avoid overlapping the button
             
-            Button(action: onToggle) {
-                ZStack {
-                    Circle()
-                        .stroke(task.isDone ? Color.clear : Color.gray.opacity(0.4), lineWidth: 1.5)
-                        .frame(width: 28, height: 28)
-                    
-                    if task.isDone {
-                        Circle()
-                            .fill(task.priority.color.primary)
-                            .frame(width: 28, height: 28)
-                        
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
-                    }
-                }
-            }
-            .buttonStyle(.plain)
+            toggleButton
         }
         .padding()
         .background(Color.white)
@@ -196,6 +171,28 @@ private struct TaskRow: View {
         .shadow(color: .black.opacity(0.04), radius: 5, y: 2)
         .contentShape(Rectangle())
         .onTapGesture { onTap() }
+    }
+    
+    /// The circular toggle button for changing task completion status
+    private var toggleButton: some View {
+        Button(action: onToggle) {
+            ZStack {
+                Circle()
+                    .stroke(task.isDone ? Color.clear : Color.gray.opacity(0.4), lineWidth: 1.5)
+                    .frame(width: 28, height: 28)
+                
+                if task.isDone {
+                    Circle()
+                        .fill(task.priority.color.primary)
+                        .frame(width: 28, height: 28)
+                    
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -212,31 +209,23 @@ struct MatrixListView: View {
     var onSwap: () -> Void = {}
     
     @State private var showingAddTask = false
-    @State private var selectedMode: MatrixMode = .all
+    @State private var selectedPriority: Priority = .all
     @State private var selectedTask: TaskModel? = nil
     
     private var filteredTasks: [TaskModel] {
         let baseTasks = tasks.applying(filter: filterState)
-        if let p = selectedMode.priority {
-            return baseTasks.filter { $0.priority == p }
+        if selectedPriority != .all {
+            return baseTasks.filter { $0.priority == selectedPriority }
         } else {
             return baseTasks
-        }
-    }
-    
-    private func mode(from priority: Priority) -> MatrixMode {
-        switch priority {
-        case .doFirst: return .urgentImportant
-        case .schedule: return .notUrgentImportant
-        case .delegate: return .urgentNotImportant
-        case .eliminate: return .notUrgentNotImportant
         }
     }
     
     var body: some View {
         VStack(spacing: 0) {
             
-            // ── Manual large title (inline nav bar = no UIKit scroll hijack) ──
+            // Manual large title used alongside inline nav bar 
+            // to prevent default UIKit scroll hijacking behaviors
             HStack {
                 Text("Matrix")
                     .font(.largeTitle)
@@ -249,7 +238,7 @@ struct MatrixListView: View {
             
             ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
-                        ModeSelector(selected: selectedMode, onSelect: { selectedMode = $0 })
+                        PrioritySelector(selected: selectedPriority, onSelect: { selectedPriority = $0 })
                         
                         Text("Today")
                             .font(.title2)
@@ -259,7 +248,6 @@ struct MatrixListView: View {
                         LazyVStack(spacing: 12) {
                             ForEach(filteredTasks) { task in
                                 TaskRow(task: task,
-                                        iconMode: mode(from: task.priority),
                                         onToggle: {
                                             withAnimation {
                                                 task.isDone.toggle()
@@ -286,8 +274,8 @@ struct MatrixListView: View {
             .sheet(isPresented: $showingAddTask) {
                 AddTaskView()
             }
-            // Edit existing task — use .sheet(item:) so it re-opens correctly
-            // when tapping different tasks back-to-back
+            // Edit an existing task. We use .sheet(item:) to ensure the sheet
+            // correctly re-renders when tapping different tasks sequentially.
             .sheet(item: $selectedTask) { task in
                 AddTaskView(taskToEdit: task)
             }
@@ -308,7 +296,7 @@ let previewContainer: ModelContainer = {
         }
         return container
     } catch {
-        fatalError("Gagal membuat preview container: \(error)")
+        fatalError("Failed to create preview container: \(error)")
     }
 }()
 
