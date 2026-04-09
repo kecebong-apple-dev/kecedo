@@ -29,9 +29,6 @@ struct CalendarView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#F3F6F1")
-                    .ignoresSafeArea()
-                
                 VStack(spacing: 0) {
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 18) {
@@ -162,7 +159,7 @@ struct FilteredTaskListView: View {
             } else {
                 ForEach(tasks) { task in
                     TaskRow(task: task,
-                            iconMode: MatrixMode.mode(from: task.priority),
+                            iconMode: task.priority,
                             onToggle: {
                                 withAnimation {
                                     task.isDone.toggle()
@@ -521,7 +518,6 @@ private struct CalendarMonth {
     }
 }
 
-//#Preview {
-//    ContentView(initialTab: .calendar)
-//        .modelContainer(for: TaskModel.self, inMemory: true)
-//}
+#Preview {
+    CalendarView()
+}
