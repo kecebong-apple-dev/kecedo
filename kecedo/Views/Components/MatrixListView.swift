@@ -108,7 +108,7 @@ struct MatrixListView: View {
                     VStack(spacing: 20) {
                         PrioritySelector(selected: selectedPriority, onSelect: { selectedPriority = $0 })
                         
-                        Text("Today")
+                        Text(LocalizedStringKey(filterState.dateType.rawValue))
                             .font(.title2)
                             .bold()
                             .padding(.top, 8)
