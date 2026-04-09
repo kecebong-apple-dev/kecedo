@@ -8,10 +8,6 @@
 import SwiftUI
 import SwiftData
 
-// MARK: - Types
-
-// MatrixMode has been replaced by Priority from Constants
-
 // MARK: - Extensions / Helpers
 
 extension DateFormatter {
@@ -20,47 +16,6 @@ extension DateFormatter {
         formatter.dateFormat = "MMM d, h:mm a"
         return formatter
     }()
-}
-
-// MARK: - Subviews
-
-/// A visual badge representing the 4-quadrant Eisenhower Matrix.
-/// Selected quadrants are highlighted based on the provided priority.
-struct MatrixGridBadge: View {
-    let priority: Priority
-    
-    var body: some View {
-        VStack(spacing: 3) {
-            HStack(spacing: 3) {
-                quadrantSquare(for: .doFirst, color: Priority.doFirst.color.primary)
-                quadrantSquare(for: .schedule, color: Priority.schedule.color.primary)
-            }
-            HStack(spacing: 3) {
-                quadrantSquare(for: .delegate, color: Priority.delegate.color.primary)
-                quadrantSquare(for: .eliminate, color: Priority.eliminate.color.primary)
-            }
-        }
-    }
-    
-    /// Generates a single square within the matrix grid.
-    /// Highlights the square if it matches the current priority.
-    @ViewBuilder
-    private func quadrantSquare(for targetPriority: Priority, color: Color) -> some View {
-        if priority == .all {
-            // Fill all quadrants if the selected priority is 'all'
-            RoundedRectangle(cornerRadius: 3)
-                .fill(color)
-        } else if priority == targetPriority {
-            // Outline and highlight the specific target quadrant
-            RoundedRectangle(cornerRadius: 3)
-                .stroke(color, lineWidth: 2)
-                .background(RoundedRectangle(cornerRadius: 3).fill(Color.clear))
-        } else {
-            // Dim non-matching quadrants
-            RoundedRectangle(cornerRadius: 3)
-                .stroke(Color.gray.opacity(0.3), lineWidth: 1.5)
-        }
-    }
 }
 
 // TopBar struct removed to use standard .toolbarMain
@@ -221,6 +176,8 @@ struct MatrixListView: View {
         }
     }
     
+
+    
     var body: some View {
         VStack(spacing: 0) {
             
@@ -248,6 +205,7 @@ struct MatrixListView: View {
                         LazyVStack(spacing: 12) {
                             ForEach(filteredTasks) { task in
                                 TaskRow(task: task,
+                                        iconMode: MatrixMode.mode(from: task.priority),
                                         onToggle: {
                                             withAnimation {
                                                 task.isDone.toggle()
