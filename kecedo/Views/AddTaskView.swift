@@ -1,0 +1,319 @@
+//
+//  AddTaskView.swift
+//  kecedo
+//
+//  Created by Raka Febrian Syahputra on 07/04/26.
+//
+
+import SwiftUI
+import SwiftData
+import Vision
+
+struct AddTaskView: View {
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) var modelContext
+    
+    var taskToEdit: TaskModel?
+    
+    @State private var title: String = ""
+    @State private var desc: String = ""
+    @State private var startDate: Date = Date()
+    @State private var endDate: Date = Date()
+    @State private var matrix: Priority = .doFirst
+    
+    @State private var showImageSourceDialog: Bool = false
+    @State private var showImagePicker: Bool = false
+    @State private var imageSourceType: UIImagePickerController.SourceType = .photoLibrary
+    @State private var selectedImage: UIImage? = nil
+    
+    @State private var showDeleteConfirmation: Bool = false
+    @State private var showDiscardConfirmation: Bool = false
+    
+    private var hasChanges: Bool {
+        if let task = taskToEdit {
+            return title != task.title ||
+            desc != task.desc ||
+            startDate != task.startDate ||
+            endDate != task.endDate ||
+            matrix != task.priority
+        } else {
+            return !title.isEmpty || !desc.isEmpty
+        }
+    }
+    
+    init(taskToEdit: TaskModel? = nil) {
+        self.taskToEdit = taskToEdit
+        
+        _title = State(initialValue: taskToEdit?.title ?? "")
+        _desc = State(initialValue: taskToEdit?.desc ?? "")
+        _startDate = State(initialValue: taskToEdit?.startDate ?? Date())
+        _endDate = State(initialValue: taskToEdit?.endDate ?? Date())
+        _matrix = State(initialValue: taskToEdit?.priority ?? .doFirst)
+    }
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack (alignment: .leading, spacing: 14) {
+                    TextField("Title", text: $title)
+                        .inputFieldStyle()
+                    ZStack (alignment: .bottomTrailing) {
+                        TextField("Description", text: $desc, axis: .vertical)
+                            .lineLimit(4...4)
+                            .inputFieldStyle()
+                        if desc.isEmpty {
+                            Button {
+                                showImageSourceDialog = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "camera.viewfinder")
+                                        .foregroundStyle(.white)
+                                    
+                                    Text("Scan")
+                                        .foregroundStyle(.white)
+                                }
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color.accentColor)
+                            .clipShape(RoundedRectangle(cornerRadius: 99))
+                            .padding(.horizontal, 22)
+                            .padding(.vertical, 6)
+                            .confirmationDialog("Choose Image Source", isPresented: $showImageSourceDialog, titleVisibility: .visible) {
+                                Button("Camera") {
+                                    imageSourceType = .camera
+                                    showImagePicker = true
+                                }
+                                Button("Photo Library") {
+                                    imageSourceType = .photoLibrary
+                                    showImagePicker = true
+                                }
+                                Button("Cancel", role: .cancel) {}
+                            }
+                            .sheet(isPresented: $showImagePicker) {
+                                ImagePicker(sourceType: imageSourceType, selectedImage: $selectedImage)
+                            }
+                            .onChange(of: selectedImage) {
+                                _, newValue in
+                                if let newImage = newValue {
+                                    processImageForText(newImage)
+                                }
+                            }
+                        }
+                    }
+                    
+                    DatePicker("Start Date", selection: $startDate, in: Date()...)
+                        .inputFieldStyle()
+                    
+                    DatePicker("End Date", selection: $endDate, in: Date()...)
+                        .inputFieldStyle()
+                    
+                    Text("Matrix Area").fontWeight(.bold).font(.title2).padding(.horizontal, 16).padding(.top, 6)
+                    HStack {
+                        Button {
+                            matrix = .doFirst
+                        } label: {
+                            MatrixGridIcon(mode: .doFirst)
+                                .frame(width: 36, height: 36)
+                        }
+                        .gridIconStyle(isActive: matrix == .doFirst)
+                        Spacer()
+                        Button {
+                            matrix = .schedule
+                        } label: {
+                            MatrixGridIcon(mode: .schedule)
+                                .frame(width: 36, height: 36)
+                        }
+                        .gridIconStyle(isActive: matrix == .schedule)
+                        Spacer()
+                        Button {
+                            matrix = .delegate
+                        } label: {
+                            MatrixGridIcon(mode: .delegate)
+                                .frame(width: 36, height: 36)
+                        }
+                        .gridIconStyle(isActive: matrix == .delegate)
+                        Spacer()
+                        Button {
+                            matrix = .eliminate
+                        } label: {
+                            MatrixGridIcon(mode: .eliminate)
+                                .frame(width: 36, height: 36)
+                        }
+                        .gridIconStyle(isActive: matrix == .eliminate)
+                    }
+                    .padding(.horizontal, 36)
+                    
+                    if taskToEdit != nil {
+                        Button {
+                            showDeleteConfirmation = true
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Image(systemName: "trash")
+                                Text("Delete Task")
+                                Spacer()
+                            }
+                        }
+                        .padding()
+                        .foregroundStyle(.red)
+                        .background(Color.red.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .padding(.horizontal, 36)
+                        .padding(.top, 20)
+                        .confirmationDialog("Delete Task", isPresented: $showDeleteConfirmation) {
+                            Button("Delete", role: .destructive) {
+                                deleteTask()
+                            }
+                            Button("Cancel", role: .cancel) {}
+                        } message: {
+                            Text("Are you sure you want to delete this task? This action is irreversible.")
+                        }
+                    }
+                    
+                }
+                .navigationTitle(taskToEdit == nil ? "New Task" : "Task Detail")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            if hasChanges {
+                                showDiscardConfirmation = true
+                            } else {
+                                dismiss()
+                            }
+                        } label: {
+                            Image(systemName: "xmark")
+                        }
+                        .foregroundColor(.white)
+                        .padding(4)
+                        .background(Color.gray.opacity(0.4))
+                        .clipShape(Circle())
+                        .confirmationDialog("Discard Changes", isPresented: $showDiscardConfirmation, titleVisibility: .visible) {
+                            Button("Discard", role: .destructive) {
+                                dismiss()
+                            }
+                            Button("Keep Editing", role: .cancel) {}
+                        } message: {
+                            Text("You have unsaved changes. Are you sure you want to discard them?")
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            saveTask()
+                        } label: {
+                            Image(systemName: "checkmark")
+                        }
+                        .foregroundColor(.white)
+                        .padding(4)
+                        .background(Color.accentColor)
+                        .clipShape(Circle())
+                    }
+                }
+                .presentationDetents(taskToEdit == nil ? [.medium, .large] : [.large])
+            }
+        }
+    }
+    
+    private func processImageForText(_ image: UIImage) {
+        guard let cgImage = image.cgImage else { return }
+        
+        let request = VNRecognizeTextRequest {
+            request, error in
+            guard let observations = request.results as? [VNRecognizedTextObservation], error == nil else {
+                print("Error recognizing text: \(String(describing: error))")
+                return
+            }
+            
+            let recognizedStrings = observations.compactMap {
+                observation in
+                observation.topCandidates(1).first?.string
+            }
+            
+            let scannedText = recognizedStrings.joined(separator: " ")
+            
+            DispatchQueue.main.async {
+                if !scannedText.isEmpty {
+                    self.desc = self.desc.isEmpty ? scannedText : self.desc + "\n" + scannedText
+                }
+            }
+        }
+        
+        request.recognitionLevel = .accurate
+        
+        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try handler.perform([request])
+            } catch {
+                print("Failed to perform OCR: \(error)")
+            }
+        }
+    }
+    
+    private func saveTask(){
+        if let task = taskToEdit {
+            task.title = title
+            task.desc = desc
+            task.startDate = startDate
+            task.endDate = endDate
+            task.priority = matrix
+        } else {
+            let newTask: TaskModel = TaskModel(title: title, desc: desc, startDate: startDate, endDate: endDate, priority: matrix, isDone: false)
+            modelContext.insert(newTask)
+        }
+        
+        dismiss()
+    }
+    
+    private func deleteTask() {
+        if let task = taskToEdit {
+            modelContext.delete(task)
+            dismiss()
+        }
+    }
+}
+
+struct ImagePicker: UIViewControllerRepresentable {
+    var sourceType: UIImagePickerController.SourceType = .photoLibrary
+    @Binding var selectedImage: UIImage?
+    @Environment(\.presentationMode) private var presentationMode
+    
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let imagePicker = UIImagePickerController()
+        imagePicker.allowsEditing = false
+        imagePicker.sourceType = sourceType
+        imagePicker.delegate = context.coordinator
+        return imagePicker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        var parent: ImagePicker
+        
+        init(_ parent: ImagePicker) {
+            self.parent = parent
+        }
+        
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let image = info[.originalImage] as? UIImage {
+                parent.selectedImage = image
+            }
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+    }
+}
+
+#Preview {
+    AddTaskView()
+}

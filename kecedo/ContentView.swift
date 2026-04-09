@@ -13,12 +13,12 @@ struct ContentView: View {
     
     var body: some View {
         TabView {
-            Matrix()
+            MatrixContainerView()
             .tabItem {
                 Label("Matrix", systemImage: "square.grid.2x2")
             }
-            Text("Calendar")
-            .tabItem {
+            CalendarView()
+                .tabItem {
                 Label("Calendar", systemImage: "calendar")
             }
             Statistics()

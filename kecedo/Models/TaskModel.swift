@@ -17,22 +17,33 @@ class TaskModel: Identifiable {
     var startDate: Date
     var endDate: Date
     var priority: Priority
+    var isDone: Bool
     
-    init(id: UUID = UUID(), title: String, desc: String, startDate: Date, endDate: Date, priority: Priority) {
+    init(id: UUID = UUID(), title: String, desc: String, startDate: Date, endDate: Date, priority: Priority, isDone: Bool) {
         self.id = id
         self.title = title
         self.desc = desc
         self.startDate = startDate
         self.endDate = endDate
         self.priority = priority
+        self.isDone = isDone
     }
     
     static var dummyTasks: [TaskModel] {
         let now = Date()
         
-        let task1 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst)
-        let task2 = TaskModel(title: "Read Self-Learning Research Paper", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(86400 * 2), priority: Priority.schedule)
+        let task1 = TaskModel(title: "Finish SwiftUI Onboardingjaosi hfaeorith aei; thaeliuthael iuth ae livtuhaerlitvuaerhvltieutvlaeiutvaelbituvyaeblitvuaeytvliuaeryb", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst, isDone: false)
+        let task3 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst , isDone: false)
+        let task4 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst , isDone: false)
+        let task5 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst , isDone: true)
+        let task6 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst , isDone: false)
+        let task7 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst , isDone: false)
+        let task8 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst , isDone: false)
+        let task9 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst , isDone: true)
+        let task10 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst , isDone: false)
+        let task11 = TaskModel(title: "Finish SwiftUI Onboarding", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(96000), priority: Priority.doFirst , isDone: false)
+        let task2 = TaskModel(title: "Read Self-Learning Research Paper", desc: "Lorem ipsum dolor sit amet", startDate: now, endDate: now.addingTimeInterval(86400 * 2), priority: Priority.schedule, isDone: false)
         
-        return [task1, task2]
+        return [task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11]
     }
 }
