@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-struct MatrixFilterSheet: View {
+struct MatrixFilterView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var filterState: MatrixFilterState
 
@@ -64,5 +64,5 @@ struct MatrixFilterSheet: View {
 }
 
 #Preview {
-    MatrixFilterSheet(filterState: .constant(MatrixFilterState()))
+    MatrixFilterView(filterState: .constant(MatrixFilterState()))
 }

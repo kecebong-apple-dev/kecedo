@@ -47,6 +47,7 @@ extension View {
     ///        showingAddTask: $showingAddTask
     ///    )
     func toolbarMain(
+        title: String? = nil,
         items: ToolbarMainItems = .matrix,
         showingAddTask: Binding<Bool> = .constant(false),
         onSettings: @escaping () -> Void = {},
@@ -54,6 +55,7 @@ extension View {
         onSwap: @escaping () -> Void = {}
     ) -> some View {
         modifier(ToolbarMain(
+            title: title,
             items: items,
             showingAddTask: showingAddTask,
             onSettings: onSettings,

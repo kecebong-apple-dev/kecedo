@@ -19,10 +19,12 @@ struct ToolbarMainItems: OptionSet {
     // Presets
     static let matrix: ToolbarMainItems = [.settings, .filter, .swap, .addTask]
     static let calendar: ToolbarMainItems = [.settings, .addTask]
+    static let statistics: ToolbarMainItems = [.settings]
 }
 
 // MARK: Toolbar Main
 struct ToolbarMain: ViewModifier {
+    var title: String? = nil
     var items: ToolbarMainItems
     @Binding var showingAddTask: Bool
     var onSettings: () -> Void
@@ -33,7 +35,12 @@ struct ToolbarMain: ViewModifier {
         content
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Color.clear
+                    if let title = title {
+                        Text(title)
+                            .font(.system(size: 18, weight: .bold)) // Using standard iOS bold title size
+                    } else {
+                        Color.clear
+                    }
                 }
 
                 if items.contains(.settings) {

@@ -36,7 +36,7 @@ struct MatrixContainerView: View {
             }
         }
         .sheet(isPresented: $showingFilter) {
-            MatrixFilterSheet(filterState: $filterState)
+            MatrixFilterView(filterState: $filterState)
         }
     }
 }
