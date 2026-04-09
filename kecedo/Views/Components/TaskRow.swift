@@ -1,0 +1,92 @@
+//
+//  TaskRow.swift
+//  kecedo
+//
+//  Created by Raka Febrian Syahputra on 09/04/26.
+//
+
+import Foundation
+import SwiftUI
+
+struct TaskRow: View {
+    let task: TaskModel
+    let iconMode: MatrixMode
+    let onToggle: () -> Void
+    var onTap: (() -> Void)? = nil
+    
+    // Logika untuk menentukan teks, warna, dan ikon berdasarkan waktu tenggat
+    private var statusInfo: (text: String, color: Color, icon: String?) {
+        let dateString = DateFormatter.matrixTime.string(from: task.endDate)
+        
+        // Jika tugas sudah selesai, tampilkan abu-abu netral
+        if task.isDone {
+            return (dateString, .gray, nil)
+        }
+        
+        let timeInterval = task.endDate.timeIntervalSinceNow
+        
+        if timeInterval < 0 {
+            // Overdue (Lebih dari batas waktu) -> Merah
+            return ("Overdue - \(dateString)", .red, "exclamationmark.circle.fill")
+        } else if timeInterval < 86400 { // Kurang dari 24 Jam -> Oranye
+            let hours = Int(timeInterval / 3600)
+            let hourText = hours > 0 ? "Due in \(hours) \(hours == 1 ? "hour" : "hours")" : "Due in less than an hour"
+            return ("\(hourText) - \(dateString)", .orange, "alarm.fill")
+        } else {
+            // Normal -> Abu-abu
+            return (dateString, .gray, nil)
+        }
+    }
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            MatrixGridBadge(mode: iconMode)
+                .frame(width: 24, height: 24)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(task.title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(task.isDone ? .gray : .primary)
+                    .strikethrough(task.isDone, color: .gray)
+                    .lineLimit(1) // Memotong teks panjang menjadi "..."
+                
+                let status = statusInfo
+                HStack(spacing: 4) {
+                    if let icon = status.icon {
+                        Image(systemName: icon)
+                    }
+                    Text(status.text)
+                }
+                .font(.system(size: 13, weight: status.icon != nil ? .medium : .regular))
+                .foregroundColor(status.color)
+            }
+            
+            Spacer(minLength: 12) // Mendorong teks ke kiri agar tidak menabrak tombol
+            
+            Button(action: onToggle) {
+                ZStack {
+                    Circle()
+                        .stroke(task.isDone ? Color.clear : Color.gray.opacity(0.4), lineWidth: 1.5)
+                        .frame(width: 28, height: 28)
+                    
+                    if task.isDone {
+                        Circle()
+                            .fill(task.priority.color.primary)
+                            .frame(width: 28, height: 28)
+                        
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.04), radius: 5, y: 2)
+        .contentShape(Rectangle())
+        .onTapGesture { onTap?() }
+    }
+}

@@ -23,7 +23,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Matrix", systemImage: "square.grid.2x2")
             }
-            Text("Calendar")
+            CalendarView()
             .tabItem {
                 Label("Calendar", systemImage: "calendar")
             }
