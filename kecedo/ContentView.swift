@@ -10,12 +10,6 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Namespace private var tabBarNamespace
-    @State private var selectedTab: AppTab = .matrix
-
-    init(initialTab: AppTab = .matrix) {
-        _selectedTab = State(initialValue: initialTab)
-    }
     
     var body: some View {
         TabView {
@@ -23,7 +17,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Matrix", systemImage: "square.grid.2x2")
             }
-            CalendarView()
+            Text("Calendar")
             .tabItem {
                 Label("Calendar", systemImage: "calendar")
             }
@@ -31,12 +25,11 @@ struct ContentView: View {
             .tabItem {
                 Label("Statistics", systemImage: "chart.bar")
             }
-            .padding(.bottom, 80)
         }
     }
 }
 
 #Preview {
-    ContentView(initialTab: .calendar)
+    ContentView()
         .modelContainer(for: TaskModel.self, inMemory: true)
 }
