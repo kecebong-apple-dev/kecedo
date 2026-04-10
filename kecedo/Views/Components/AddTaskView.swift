@@ -59,7 +59,7 @@ struct AddTaskView: View {
                         .inputFieldStyle()
                     ZStack (alignment: .bottomTrailing) {
                         TextField("Description", text: $desc, axis: .vertical)
-                            .lineLimit(4...4)
+                            .lineLimit(4...)
                             .inputFieldStyle()
                         if desc.isEmpty {
                             Button {
