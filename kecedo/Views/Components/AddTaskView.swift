@@ -102,10 +102,10 @@ struct AddTaskView: View {
                         }
                     }
                     
-                    DatePicker("Start Date", selection: $startDate, in: Date()...)
+                    DatePicker("Start Date", selection: $startDate, in: ...endDate)
                         .inputFieldStyle()
                     
-                    DatePicker("End Date", selection: $endDate, in: Date()...)
+                    DatePicker("End Date", selection: $endDate, in: startDate...)
                         .inputFieldStyle()
                     
                     Text("Matrix Area").fontWeight(.bold).font(.title2).padding(.horizontal, 16).padding(.top, 6)
