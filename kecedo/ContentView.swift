@@ -23,7 +23,7 @@ struct ContentView: View {
             }
             StatisticsView()
             .tabItem {
-                Label("Statistics", systemImage: "chart.bar")
+                Label("Statistics", systemImage: "chart.pie.fill")
             }
         }
     }

@@ -22,6 +22,8 @@ struct CalendarView: View {
     @State private var showingFilter = false
     @State private var navigateToSettings = false
 
+    @Query private var tasks: [TaskModel]
+
     private var displayedMonth: CalendarMonth {
         CalendarMonth(date: currentMonth)
     }
@@ -35,6 +37,7 @@ struct CalendarView: View {
                             CalendarCard(
                                 month: displayedMonth,
                                 selectedDate: selectedDate,
+                                tasks: tasks,
                                 onTapMonthLabel: { isMonthPickerPresented = true },
                                 onSelectDay: { day in
                                     if let date = displayedMonth.date(for: day) {
@@ -180,6 +183,7 @@ struct FilteredTaskListView: View {
 private struct CalendarCard: View {
     let month: CalendarMonth
     let selectedDate: Date
+    let tasks: [TaskModel]
     let onTapMonthLabel: () -> Void
     let onSelectDay: (Int) -> Void
     let onPreviousMonth: () -> Void
@@ -188,7 +192,28 @@ private struct CalendarCard: View {
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
     private let weekSymbols = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
 
+    private var tasksByDay: [Int: [Priority]] {
+        var dict: [Int: Set<Priority>] = [:]
+        let calendar = Foundation.Calendar.current
+        for task in tasks {
+            let components = calendar.dateComponents([.year, .month, .day], from: task.endDate)
+            if components.year == month.year, components.month == month.month, let day = components.day {
+                if task.priority != .all {
+                    dict[day, default: []].insert(task.priority)
+                }
+            }
+        }
+        var result: [Int: [Priority]] = [:]
+        for (day, priorities) in dict {
+            let sortOrder: [Priority: Int] = [.doFirst: 1, .schedule: 2, .delegate: 3, .eliminate: 4]
+            result[day] = Array(priorities).sorted { (sortOrder[$0] ?? 99) < (sortOrder[$1] ?? 99) }
+        }
+        return result
+    }
+
     var body: some View {
+        let dayPriorities = tasksByDay
+        
         VStack(spacing: 18) {
             HStack {
                 Button(action: onTapMonthLabel) {
@@ -230,11 +255,12 @@ private struct CalendarCard: View {
                         CalendarDateCell(
                             day: day,
                             isSelected: month.isSelected(day: day, selectedDate: selectedDate),
+                            priorities: dayPriorities[day] ?? [],
                             onTap: { onSelectDay(day) }
                         )
                     } else {
                         Color.clear
-                            .frame(height: 48)
+                            .frame(height: 58)
                     }
                 }
             }
@@ -251,6 +277,7 @@ private struct CalendarCard: View {
 private struct CalendarDateCell: View {
     let day: Int
     let isSelected: Bool
+    let priorities: [Priority]
     let onTap: () -> Void
 
     var body: some View {
@@ -262,10 +289,20 @@ private struct CalendarDateCell: View {
                     .frame(width: 42, height: 42)
                     .background(isSelected ? Color.blue.opacity(0.14) : Color.clear)
                     .clipShape(Circle())
-                
-                Circle()
-                    .fill(isSelected ? Color.blue : Color.clear)
-                    .frame(width: 7, height: 7)
+                    
+                HStack(spacing: 3) {
+                    if priorities.isEmpty {
+                        Circle()
+                            .fill(Color.clear)
+                            .frame(width: 5, height: 5)
+                    } else {
+                        ForEach(priorities, id: \.self) { priority in
+                            Circle()
+                                .fill(priority.color.primary)
+                                .frame(width: 5, height: 5)
+                        }
+                    }
+                }
             }
             .frame(maxWidth: .infinity, minHeight: 58)
         }
