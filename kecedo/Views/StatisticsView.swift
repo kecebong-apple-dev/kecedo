@@ -12,8 +12,7 @@ import Charts
 struct StatisticsView: View {
     @Query private var tasks: [TaskModel]
     @State private var navigateToSettings = false
-    
-    // Derived properties
+
     private var completedTasks: [TaskModel] {
         tasks.filter { $0.isDone }
     }

@@ -118,19 +118,7 @@ struct MatrixView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-
-            // ── Manual large title (inline nav bar = no UIKit scroll hijack) ──
-//                HStack {
-//                    Text("Matrix")
-//                        .font(.largeTitle)
-//                        .fontWeight(.bold)
-//                    Spacer()
-//                }
-//                .padding(.horizontal, 16)
-//                .padding(.top, 4)
-//                .padding(.bottom, 4)
-
-                // ── Grid ──────────────────────────────────────────────────────────
+                // Grid
                 GeometryReader { geo in
                     let hPad:    CGFloat = 12
                     let labelW:  CGFloat = 28
@@ -243,8 +231,6 @@ struct MatrixView: View {
         task.toggleDone()
     }
 }
-
-// MARK: Preview
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)

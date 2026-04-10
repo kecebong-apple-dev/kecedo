@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 
 // MARK: - Extensions / Helpers
-
 extension DateFormatter {
     static let matrixTime: DateFormatter = {
         let formatter = DateFormatter()
@@ -17,8 +16,6 @@ extension DateFormatter {
         return formatter
     }()
 }
-
-// TopBar struct removed to use standard .toolbarMain
 
 /// A horizontal selector for picking a matrix priority filter
 private struct PrioritySelector: View {
@@ -52,18 +49,11 @@ private struct PrioritySelector: View {
     /// Determines the background color based on selection and priority
     private func backgroundColor(for priority: Priority, isSelected: Bool) -> Color {
         guard isSelected else { return .white }
-        
-        // Special handling for '.all' since its default secondary hex is completely black
-//        if priority == .all {
-//            return .gray.opacity(0.15)
-//        }
-        
         return priority.color.secondary
     }
 }
 
 // MARK: - Main View
-
 struct MatrixListView: View {
     @Environment(\.modelContext) private var modelContext
     
@@ -91,22 +81,10 @@ struct MatrixListView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            
-            // Manual large title used alongside inline nav bar 
-            // to prevent default UIKit scroll hijacking behaviors
-//            HStack {
-//                Text("Matrix")
-//                    .font(.largeTitle)
-//                    .fontWeight(.bold)
-//                Spacer()
-//            }
-//            .padding(.horizontal, 16)
-//            .padding(.top, 4)
-//            .padding(.bottom, 4)
-            
             ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         PrioritySelector(selected: selectedPriority, onSelect: { selectedPriority = $0 })
+                            .padding(.top, 18)
                         
                         VStack(){
                             Text(LocalizedStringKey(filterState.dateType.rawValue))
@@ -155,8 +133,6 @@ struct MatrixListView: View {
             .sheet(isPresented: $showingAddTask) {
                 AddTaskView()
             }
-            // Edit an existing task. We use .sheet(item:) to ensure the sheet
-            // correctly re-renders when tapping different tasks sequentially.
             .sheet(item: $selectedTask) { task in
                 AddTaskView(taskToEdit: task)
             }
@@ -164,7 +140,6 @@ struct MatrixListView: View {
 }
 
 // MARK: - Preview Setup
-
 @MainActor
 let previewContainer: ModelContainer = {
     do {

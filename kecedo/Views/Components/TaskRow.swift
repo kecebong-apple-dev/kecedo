@@ -14,11 +14,10 @@ struct TaskRow: View {
     let onToggle: () -> Void
     var onTap: (() -> Void)? = nil
     
-    // Logika untuk menentukan teks, warna, dan ikon berdasarkan waktu tenggat
+    // Status deadline logic
     private var statusInfo: (text: String, color: Color, icon: String?) {
         let dateString = DateFormatter.matrixTime.string(from: task.endDate)
-        
-        // Jika tugas sudah selesai, tampilkan abu-abu netral
+
         if task.isDone {
             return (dateString, .gray, nil)
         }
@@ -26,14 +25,12 @@ struct TaskRow: View {
         let timeInterval = task.endDate.timeIntervalSinceNow
         
         if timeInterval < 0 {
-            // Overdue (Lebih dari batas waktu) -> Merah
             return ("Overdue - \(dateString)", .red, "exclamationmark.circle.fill")
-        } else if timeInterval < 86400 { // Kurang dari 24 Jam -> Oranye
+        } else if timeInterval < 86400 { 
             let hours = Int(timeInterval / 3600)
             let hourText = hours > 0 ? "Due in \(hours) \(hours == 1 ? "hour" : "hours")" : "Due in less than an hour"
             return ("\(hourText) - \(dateString)", .orange, "alarm.fill")
         } else {
-            // Normal -> Abu-abu
             return (dateString, .gray, nil)
         }
     }
@@ -48,7 +45,7 @@ struct TaskRow: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(task.isDone ? .gray : .primary)
                     .strikethrough(task.isDone, color: .gray)
-                    .lineLimit(1) // Memotong teks panjang menjadi "..."
+                    .lineLimit(1)
                 
                 let status = statusInfo
                 HStack(spacing: 4) {
@@ -61,7 +58,7 @@ struct TaskRow: View {
                 .foregroundColor(status.color)
             }
             
-            Spacer(minLength: 12) // Mendorong teks ke kiri agar tidak menabrak tombol
+            Spacer(minLength: 12)
             
             Button(action: onToggle) {
                 ZStack {
