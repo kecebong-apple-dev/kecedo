@@ -67,7 +67,7 @@ struct CalendarView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbarMain(
-                title: "Calendar",
+                title: "Calendar".localized(appLanguage),
                 items: .calendar,
                 showingAddTask: $showingAddTask,
                 onSettings: { navigateToSettings = true },

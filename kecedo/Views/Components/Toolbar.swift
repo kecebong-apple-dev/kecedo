@@ -24,6 +24,8 @@ struct ToolbarMainItems: OptionSet {
 
 // MARK: Toolbar Main
 struct ToolbarMain: ViewModifier {
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
+    
     var title: String? = nil
     var items: ToolbarMainItems
     @Binding var showingAddTask: Bool
@@ -36,7 +38,7 @@ struct ToolbarMain: ViewModifier {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     if let title = title {
-                        Text(title)
+                        Text(title.localized(appLanguage))
                             .font(.system(size: 18, weight: .bold))
                     } else {
                         Color.clear
