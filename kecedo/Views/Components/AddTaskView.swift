@@ -12,6 +12,7 @@ import Vision
 struct AddTaskView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) var modelContext
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
     
     var taskToEdit: TaskModel?
     
@@ -24,6 +25,7 @@ struct AddTaskView: View {
     @State private var showImageSourceDialog: Bool = false
     @State private var showImagePicker: Bool = false
     @State private var imageSourceType: UIImagePickerController.SourceType = .photoLibrary
+    
     @State private var selectedImage: UIImage? = nil
     
     @State private var showDeleteConfirmation: Bool = false
@@ -55,10 +57,10 @@ struct AddTaskView: View {
         NavigationStack {
             ScrollView {
                 VStack (alignment: .leading, spacing: 14) {
-                    TextField("Title", text: $title)
+                    TextField("Title".localized(appLanguage), text: $title)
                         .inputFieldStyle()
                     ZStack (alignment: .bottomTrailing) {
-                        TextField("Description", text: $desc, axis: .vertical)
+                        TextField("Description".localized(appLanguage), text: $desc, axis: .vertical)
                             .lineLimit(4...4)
                             .inputFieldStyle()
                         if desc.isEmpty {
@@ -69,7 +71,7 @@ struct AddTaskView: View {
                                     Image(systemName: "camera.viewfinder")
                                         .foregroundStyle(.white)
                                     
-                                    Text("Scan")
+                                    Text("Scan".localized(appLanguage))
                                         .foregroundStyle(.white)
                                 }
                             }
@@ -79,16 +81,16 @@ struct AddTaskView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 99))
                             .padding(.horizontal, 22)
                             .padding(.vertical, 6)
-                            .confirmationDialog("Choose Image Source", isPresented: $showImageSourceDialog, titleVisibility: .visible) {
-                                Button("Camera") {
+                            .confirmationDialog("Choose Image Source".localized(appLanguage), isPresented: $showImageSourceDialog, titleVisibility: .visible) {
+                                Button("Camera".localized(appLanguage)) {
                                     imageSourceType = .camera
                                     showImagePicker = true
                                 }
-                                Button("Photo Library") {
+                                Button("Photo Library".localized(appLanguage)) {
                                     imageSourceType = .photoLibrary
                                     showImagePicker = true
                                 }
-                                Button("Cancel", role: .cancel) {}
+                                Button("Cancel".localized(appLanguage), role: .cancel) {}
                             }
                             .sheet(isPresented: $showImagePicker) {
                                 ImagePicker(sourceType: imageSourceType, selectedImage: $selectedImage)
@@ -102,13 +104,13 @@ struct AddTaskView: View {
                         }
                     }
                     
-                    DatePicker("Start Date", selection: $startDate, in: Date()...)
+                    DatePicker("Start Date".localized(appLanguage), selection: $startDate, in: Date()...)
                         .inputFieldStyle()
                     
-                    DatePicker("End Date", selection: $endDate, in: Date()...)
+                    DatePicker("End Date".localized(appLanguage), selection: $endDate, in: Date()...)
                         .inputFieldStyle()
                     
-                    Text("Matrix Area").fontWeight(.bold).font(.title2).padding(.horizontal, 16).padding(.top, 6)
+                    Text("Matrix Area".localized(appLanguage)).fontWeight(.bold).font(.title2).padding(.horizontal, 16).padding(.top, 6)
                     HStack {
                         ForEach([Priority.doFirst, Priority.schedule, Priority.delegate, Priority.eliminate], id: \.self) { priority in
                             Button {
@@ -142,7 +144,7 @@ struct AddTaskView: View {
                             HStack {
                                 Spacer()
                                 Image(systemName: "trash")
-                                Text("Delete Task")
+                                Text("Delete Task".localized(appLanguage))
                                 Spacer()
                             }
                         }
@@ -152,18 +154,18 @@ struct AddTaskView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .padding(.horizontal, 36)
                         .padding(.top, 20)
-                        .confirmationDialog("Delete Task", isPresented: $showDeleteConfirmation) {
-                            Button("Delete", role: .destructive) {
+                        .confirmationDialog("Delete Task".localized(appLanguage), isPresented: $showDeleteConfirmation) {
+                            Button("Delete".localized(appLanguage), role: .destructive) {
                                 deleteTask()
                             }
-                            Button("Cancel", role: .cancel) {}
+                            Button("Cancel".localized(appLanguage), role: .cancel) {}
                         } message: {
-                            Text("Are you sure you want to delete this task? This action is irreversible.")
+                            Text("Are you sure you want to delete this task? This action is irreversible.".localized(appLanguage))
                         }
                     }
                     
                 }
-                .navigationTitle(taskToEdit == nil ? "New Task" : "Task Detail")
+                .navigationTitle(taskToEdit == nil ? "New Task".localized(appLanguage) : "Task Detail".localized(appLanguage))
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
@@ -180,13 +182,13 @@ struct AddTaskView: View {
                         .padding(4)
                         .background(Color.gray.opacity(0.4))
                         .clipShape(Circle())
-                        .confirmationDialog("Discard Changes", isPresented: $showDiscardConfirmation, titleVisibility: .visible) {
-                            Button("Discard", role: .destructive) {
+                        .confirmationDialog("Discard Changes".localized(appLanguage), isPresented: $showDiscardConfirmation, titleVisibility: .visible) {
+                            Button("Discard".localized(appLanguage), role: .destructive) {
                                 dismiss()
                             }
-                            Button("Keep Editing", role: .cancel) {}
+                            Button("Keep Editing".localized(appLanguage), role: .cancel) {}
                         } message: {
-                            Text("You have unsaved changes. Are you sure you want to discard them?")
+                            Text("You have unsaved changes. Are you sure you want to discard them?".localized(appLanguage))
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {

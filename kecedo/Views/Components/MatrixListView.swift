@@ -66,6 +66,7 @@ private struct PrioritySelector: View {
 
 struct MatrixListView: View {
     @Environment(\.modelContext) private var modelContext
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
     
     @Query(sort: \TaskModel.endDate) private var tasks: [TaskModel]
     
@@ -87,15 +88,13 @@ struct MatrixListView: View {
         }
     }
     
-
-    
     var body: some View {
         VStack(spacing: 0) {
             
             // Manual large title used alongside inline nav bar 
             // to prevent default UIKit scroll hijacking behaviors
             HStack {
-                Text("Matrix")
+                Text("Matrix".localized(appLanguage))
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 Spacer()
@@ -108,23 +107,29 @@ struct MatrixListView: View {
                     VStack(spacing: 20) {
                         PrioritySelector(selected: selectedPriority, onSelect: { selectedPriority = $0 })
                         
-                        Text(LocalizedStringKey(filterState.dateType.rawValue))
+                        Text(filterState.dateType.rawValue.localized(appLanguage))
                             .font(.title2)
                             .bold()
                             .padding(.top, 8)
                         
                         LazyVStack(spacing: 12) {
-                            ForEach(filteredTasks) { task in
-                                TaskRow(task: task,
-                                        iconMode: task.priority,
-                                        onToggle: {
-                                            withAnimation {
-                                                task.toggleDone()
-                                            }
-                                        },
-                                        onTap: {
-                                            selectedTask = task
-                                        })
+                            if filteredTasks.isEmpty {
+                                Text("No tasks on this date.".localized(appLanguage))
+                                    .foregroundColor(.gray)
+                                    .padding(.top, 40)
+                            } else {
+                                ForEach(filteredTasks) { task in
+                                    TaskRow(task: task,
+                                            iconMode: task.priority,
+                                            onToggle: {
+                                                withAnimation {
+                                                    task.toggleDone()
+                                                }
+                                            },
+                                            onTap: {
+                                                selectedTask = task
+                                            })
+                                }
                             }
                         }
                         .padding(.horizontal)

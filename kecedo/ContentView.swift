@@ -9,21 +9,22 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
         TabView {
             MatrixContainerView()
             .tabItem {
-                Label("Matrix", systemImage: "square.grid.2x2")
+                Label("Matrix".localized(appLanguage), systemImage: "square.grid.2x2")
             }
             CalendarView()
                 .tabItem {
-                Label("Calendar", systemImage: "calendar")
+                Label("Calendar".localized(appLanguage), systemImage: "calendar")
             }
             StatisticsView()
             .tabItem {
-                Label("Statistics", systemImage: "chart.bar")
+                Label("Statistics".localized(appLanguage), systemImage: "chart.bar")
             }
         }
     }

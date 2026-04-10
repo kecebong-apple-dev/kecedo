@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct TaskRow: View {
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
     let task: TaskModel
     let iconMode: Priority
     let onToggle: () -> Void
@@ -16,7 +17,9 @@ struct TaskRow: View {
     
     // Logika untuk menentukan teks, warna, dan ikon berdasarkan waktu tenggat
     private var statusInfo: (text: String, color: Color, icon: String?) {
-        let dateString = DateFormatter.matrixTime.string(from: task.endDate)
+        let formatter = DateFormatter.localizedFormatter(language: appLanguage)
+        formatter.dateFormat = "HH:mm"
+        let dateString = formatter.string(from: task.endDate)
         
         // Jika tugas sudah selesai, tampilkan abu-abu netral
         if task.isDone {
@@ -27,10 +30,19 @@ struct TaskRow: View {
         
         if timeInterval < 0 {
             // Overdue (Lebih dari batas waktu) -> Merah
-            return ("Overdue - \(dateString)", .red, "exclamationmark.circle.fill")
+            return ("Overdue - %@".localized(appLanguage, dateString), .red, "exclamationmark.circle.fill")
         } else if timeInterval < 86400 { // Kurang dari 24 Jam -> Oranye
             let hours = Int(timeInterval / 3600)
-            let hourText = hours > 0 ? "Due in \(hours) \(hours == 1 ? "hour" : "hours")" : "Due in less than an hour"
+            let hourText: String
+            if hours > 0 {
+                if hours == 1 {
+                    hourText = "Due in %lld hour".localized(appLanguage, Int64(hours))
+                } else {
+                    hourText = "Due in %lld hours".localized(appLanguage, Int64(hours))
+                }
+            } else {
+                hourText = "Due in less than an hour".localized(appLanguage)
+            }
             return ("\(hourText) - \(dateString)", .orange, "alarm.fill")
         } else {
             // Normal -> Abu-abu

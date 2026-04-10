@@ -21,14 +21,18 @@ enum Priority: String, Codable, Identifiable, CaseIterable {
     }
     
     // set label eisenhower
-    var name: String {
+    func localizedName(language: String) -> String {
         switch self {
-        case .all:       return "All"
-        case .doFirst:   return "Do First"
-        case .schedule:  return "Schedule"
-        case .delegate:  return "Delegate"
-        case .eliminate: return "Eliminate"
+        case .all:       return "All".localized(language)
+        case .doFirst:   return "Do First".localized(language)
+        case .schedule:  return "Schedule".localized(language)
+        case .delegate:  return "Delegate".localized(language)
+        case .eliminate: return "Eliminate".localized(language)
         }
+    }
+    
+    var name: String {
+        return localizedName(language: UserDefaults.standard.string(forKey: "appLanguage") ?? "English")
     }
     
     // set color eisenhower
