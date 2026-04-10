@@ -108,10 +108,21 @@ struct MatrixListView: View {
                     VStack(spacing: 20) {
                         PrioritySelector(selected: selectedPriority, onSelect: { selectedPriority = $0 })
                         
-                        Text(LocalizedStringKey(filterState.dateType.rawValue))
-                            .font(.title2)
-                            .bold()
-                            .padding(.top, 8)
+                        VStack(){
+                            Text(LocalizedStringKey(filterState.dateType.rawValue))
+                                .font(.title2)
+                                .bold()
+                                .padding(.top, 8)
+                            
+                            if(filterState.dateType == .period){
+                                HStack(spacing: 5){
+                                    Text(filterState.startDate, format: .dateTime.day().month().year())
+                                    Text("-")
+                                    Text(filterState.endDate, format: .dateTime.day().month().year())
+                                }
+                            }
+                        }
+                        
                         
                         LazyVStack(spacing: 12) {
                             ForEach(filteredTasks) { task in

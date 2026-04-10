@@ -20,9 +20,10 @@ enum Priority: String, Codable, Identifiable, CaseIterable {
         self.rawValue
     }
     
+    // set label eisenhower
     var name: String {
         switch self {
-        case .all: return "All"
+        case .all:       return "All"
         case .doFirst:   return "Do First"
         case .schedule:  return "Schedule"
         case .delegate:  return "Delegate"
@@ -30,6 +31,7 @@ enum Priority: String, Codable, Identifiable, CaseIterable {
         }
     }
     
+    // set color eisenhower
     var color: MultiColor {
         switch self {
         case .all:       return MultiColor(primary: Color(hex: "#181D33"), secondary: Color(hex: "#E3E3E3"))

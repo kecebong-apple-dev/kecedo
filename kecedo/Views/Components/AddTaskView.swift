@@ -59,7 +59,7 @@ struct AddTaskView: View {
                         .inputFieldStyle()
                     ZStack (alignment: .bottomTrailing) {
                         TextField("Description", text: $desc, axis: .vertical)
-                            .lineLimit(4...4)
+                            .lineLimit(4...)
                             .inputFieldStyle()
                         if desc.isEmpty {
                             Button {
@@ -102,10 +102,10 @@ struct AddTaskView: View {
                         }
                     }
                     
-                    DatePicker("Start Date", selection: $startDate, in: Date()...)
+                    DatePicker("Start Date", selection: $startDate, in: ...endDate)
                         .inputFieldStyle()
                     
-                    DatePicker("End Date", selection: $endDate, in: Date()...)
+                    DatePicker("End Date", selection: $endDate, in: startDate...)
                         .inputFieldStyle()
                     
                     Text("Matrix Area").fontWeight(.bold).font(.title2).padding(.horizontal, 16).padding(.top, 6)
