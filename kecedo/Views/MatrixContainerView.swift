@@ -42,3 +42,7 @@ struct MatrixContainerView: View {
         }
     }
 }
+
+#Preview {
+    MatrixContainerView()
+}

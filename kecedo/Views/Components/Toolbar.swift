@@ -37,7 +37,7 @@ struct ToolbarMain: ViewModifier {
                 ToolbarItem(placement: .principal) {
                     if let title = title {
                         Text(title)
-                            .font(.system(size: 18, weight: .bold)) // Using standard iOS bold title size
+                            .font(.system(size: 18, weight: .bold))
                     } else {
                         Color.clear
                     }

@@ -56,12 +56,13 @@ struct CalendarView: View {
                             taskSection
                         }
                         .padding(.horizontal, 16)
-                        .padding(.top, 14)
+                        .padding(.top, -30)
                         .padding(.bottom, 136)
                     }
                 }
             }
             .toolbarMain(
+                title: "Calendar",
                 items: .calendar,
                 showingAddTask: $showingAddTask,
                 onSettings: { navigateToSettings = true },
@@ -238,8 +239,6 @@ private struct CalendarCard: View {
             }
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 14)
-        .background(Color(hex: "#F7F7F7"))
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 22, style: .continuous)
@@ -434,7 +433,7 @@ private struct MonthYearPickerSheet: View {
         .padding(.horizontal, 20)
         .padding(.top, 20)
         .padding(.bottom, 12)
-        .background(Color(hex: "#F7F7F7"))
+//        .background(Color(hex: "#F7F7F7"))
     }
 }
 
