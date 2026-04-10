@@ -56,6 +56,7 @@ private struct PrioritySelector: View {
 // MARK: - Main View
 struct MatrixListView: View {
     @Environment(\.modelContext) private var modelContext
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
     
     @Query(sort: \TaskModel.endDate) private var tasks: [TaskModel]
     
@@ -77,10 +78,21 @@ struct MatrixListView: View {
         }
     }
     
-
-    
     var body: some View {
         VStack(spacing: 0) {
+            
+            // Manual large title used alongside inline nav bar 
+            // to prevent default UIKit scroll hijacking behaviors
+            HStack {
+                Text("Matrix".localized(appLanguage))
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+            .padding(.bottom, 4)
+            
             ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         PrioritySelector(selected: selectedPriority, onSelect: { selectedPriority = $0 })
@@ -103,17 +115,23 @@ struct MatrixListView: View {
                         
                         
                         LazyVStack(spacing: 12) {
-                            ForEach(filteredTasks) { task in
-                                TaskRow(task: task,
-                                        iconMode: task.priority,
-                                        onToggle: {
-                                            withAnimation {
-                                                task.toggleDone()
-                                            }
-                                        },
-                                        onTap: {
-                                            selectedTask = task
-                                        })
+                            if filteredTasks.isEmpty {
+                                Text("No tasks on this date.".localized(appLanguage))
+                                    .foregroundColor(.gray)
+                                    .padding(.top, 40)
+                            } else {
+                                ForEach(filteredTasks) { task in
+                                    TaskRow(task: task,
+                                            iconMode: task.priority,
+                                            onToggle: {
+                                                withAnimation {
+                                                    task.toggleDone()
+                                                }
+                                            },
+                                            onTap: {
+                                                selectedTask = task
+                                            })
+                                }
                             }
                         }
                         .padding(.horizontal)

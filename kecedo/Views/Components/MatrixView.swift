@@ -96,6 +96,7 @@ private struct TaskRowView: View {
 // MARK: Matrix View
 
 struct MatrixView: View {
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
 
     // Fetch all tasks from SwiftData; sort by endDate ascending
     @Query(sort: \TaskModel.endDate) private var allTasks: [TaskModel]
@@ -109,7 +110,9 @@ struct MatrixView: View {
     var onFilter: () -> Void = {}
     var onSwap: () -> Void = {}
 
-    private let columnLabels = ["Urgent", "Not Urgent"]
+    private var columnLabels: [String] {
+        ["Urgent".localized(appLanguage), "Not Urgent".localized(appLanguage)]
+    }
 
     // Helper: filter tasks per priority quadrant
     private func tasks(for priority: Priority) -> [TaskModel] {
@@ -118,7 +121,19 @@ struct MatrixView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-                // Grid
+
+            // ── Manual large title (inline nav bar = no UIKit scroll hijack) ──
+                HStack {
+                    Text("Matrix".localized(appLanguage))
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 4)
+                .padding(.bottom, 4)
+
+                // ── Grid ──────────────────────────────────────────────────────────
                 GeometryReader { geo in
                     let hPad:    CGFloat = 12
                     let labelW:  CGFloat = 28
@@ -147,8 +162,8 @@ struct MatrixView: View {
 
                             // Row labels
                             VStack(spacing: gap) {
-                                rowLabel("Important",     height: cellH)
-                                rowLabel("Not Important", height: cellH)
+                                rowLabel("Important".localized(appLanguage),     height: cellH)
+                                rowLabel("Not Important".localized(appLanguage), height: cellH)
                             }
                             .frame(width: labelW)
 

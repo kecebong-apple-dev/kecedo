@@ -9,15 +9,16 @@ import SwiftUI
 
 struct MatrixFilterView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
     @Binding var filterState: MatrixFilterState
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    Picker("Date Filter", selection: $filterState.dateType) {
+                    Picker("Date Filter".localized(appLanguage), selection: $filterState.dateType) {
                         ForEach(DateFilterType.allCases) { type in
-                            Text(type.rawValue).tag(type)
+                            Text(type.rawValue.localized(appLanguage)).tag(type)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -25,21 +26,21 @@ struct MatrixFilterView: View {
                     .listRowBackground(Color.clear)
                     
                     if filterState.dateType == .period {
-                        DatePicker("Start Date", selection: $filterState.startDate, displayedComponents: .date)
-                        DatePicker("End Date", selection: $filterState.endDate, displayedComponents: .date)
+                        DatePicker("Start Date".localized(appLanguage), selection: $filterState.startDate, displayedComponents: .date)
+                        DatePicker("End Date".localized(appLanguage), selection: $filterState.endDate, displayedComponents: .date)
                     }
                 } header: {
-                    Text("Date Filter")
+                    Text("Date Filter".localized(appLanguage))
                         .font(.headline)
                         .foregroundColor(.primary)
                         .textCase(nil)
                 }
                 
                 Section {
-                    Toggle("Show Completed", isOn: $filterState.showCompleted)
+                    Toggle("Show Completed".localized(appLanguage), isOn: $filterState.showCompleted)
                 }
             }
-            .navigationTitle("Filter")
+            .navigationTitle("Filter".localized(appLanguage))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct CalendarView: View {
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
     @State private var currentMonth = Foundation.Calendar.current.date(
         from: Foundation.Calendar.current.dateComponents([.year, .month], from: .now)
     ) ?? .now
@@ -53,7 +54,8 @@ struct CalendarView: View {
                                     if let nextMonth = Foundation.Calendar.current.date(byAdding: .month, value: 1, to: currentMonth) {
                                         updateCurrentMonth(to: nextMonth)
                                     }
-                                }
+                                },
+                                appLanguage: appLanguage
                             )
                             taskSection
                         }
@@ -101,12 +103,12 @@ struct CalendarView: View {
                 .foregroundStyle(.black)
                 .padding(.horizontal, 16)
                 .padding(.top, 2)
-            FilteredTaskListView(selectedDate: selectedDate, selectedTask: $selectedTask)
+            FilteredTaskListView(selectedDate: selectedDate, selectedTask: $selectedTask, appLanguage: appLanguage)
         }
     }
 
     private var selectedDateText: String {
-        let formatter = DateFormatter()
+        let formatter = DateFormatter.localizedFormatter(language: appLanguage)
         formatter.dateFormat = "EEEE, d MMMM yyyy"
         return formatter.string(from: selectedDate)
     }
@@ -140,9 +142,12 @@ struct CalendarView: View {
 struct FilteredTaskListView: View {
     @Query private var tasks: [TaskModel]
     @Binding private var selectedTask: TaskModel?
+    let appLanguage: String
     
-    init(selectedDate: Date, selectedTask: Binding<TaskModel?>) {
+    init(selectedDate: Date, selectedTask: Binding<TaskModel?>, appLanguage: String) {
+        print(appLanguage)
         self._selectedTask = selectedTask
+        self.appLanguage = appLanguage
         
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: selectedDate)
@@ -159,7 +164,7 @@ struct FilteredTaskListView: View {
     var body: some View {
         LazyVStack(spacing:12) {
             if tasks.isEmpty {
-                Text("Tidak ada tugas di tanggal ini.")
+                Text("No tasks on this date.".localized(appLanguage))
                     .foregroundColor(.gray)
             } else {
                 ForEach(tasks) { task in
@@ -188,9 +193,13 @@ private struct CalendarCard: View {
     let onSelectDay: (Int) -> Void
     let onPreviousMonth: () -> Void
     let onNextMonth: () -> Void
+    let appLanguage: String
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
-    private let weekSymbols = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+    private var weekSymbols: [String] {
+        let formatter = DateFormatter.localizedFormatter(language: appLanguage)
+        return formatter.shortWeekdaySymbols.map { $0.uppercased() }
+    }
 
     private var tasksByDay: [Int: [Priority]] {
         var dict: [Int: Set<Priority>] = [:]
@@ -218,7 +227,7 @@ private struct CalendarCard: View {
             HStack {
                 Button(action: onTapMonthLabel) {
                     HStack(spacing: 6) {
-                        Text(month.title)
+                        Text(month.title(language: appLanguage))
                             .font(.system(size: 19, weight: .semibold, design: .rounded))
                             .foregroundStyle(.black)
                         Image(systemName: "chevron.right")
@@ -413,6 +422,7 @@ private struct TaskGridIcon: View {
 }
 
 private struct MonthYearPickerSheet: View {
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
     let selectedMonth: Date
     let onSelect: (Date) -> Void
 
@@ -420,7 +430,9 @@ private struct MonthYearPickerSheet: View {
     @State private var monthIndex: Int
     @State private var year: Int
 
-    private let months = CalendarMonth.monthSymbols
+    private var months: [String] {
+        DateFormatter.localizedFormatter(language: appLanguage).monthSymbols
+    }
     private let yearRange = Array(2020...2035)
 
     init(selectedMonth: Date, onSelect: @escaping (Date) -> Void) {
@@ -436,11 +448,11 @@ private struct MonthYearPickerSheet: View {
     var body: some View {
         VStack(spacing: 18) {
             HStack {
-                Text("Select Month")
+                Text("Select Month".localized(appLanguage))
                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                     .foregroundStyle(.black)
                 Spacer()
-                Button("Done") {
+                Button("Done".localized(appLanguage)) {
                     let date = Foundation.Calendar.current.date(
                         from: DateComponents(year: year, month: monthIndex + 1, day: 1)
                     ) ?? selectedMonth
@@ -452,14 +464,14 @@ private struct MonthYearPickerSheet: View {
             }
 
             HStack(spacing: 0) {
-                Picker("Month", selection: $monthIndex) {
+                Picker("Month".localized(appLanguage), selection: $monthIndex) {
                     ForEach(Array(months.enumerated()), id: \.offset) { index, month in
                         Text(month).tag(index)
                     }
                 }
                 .pickerStyle(.wheel)
 
-                Picker("Year", selection: $year) {
+                Picker("Year".localized(appLanguage), selection: $year) {
                     ForEach(yearRange, id: \.self) { year in
                         Text(verbatim: String(year)).tag(year)
                     }
@@ -504,8 +516,8 @@ private struct CalendarMonth {
         self.month = components.month ?? 1
     }
 
-    var title: String {
-        let formatter = DateFormatter()
+    func title(language: String) -> String {
+        let formatter = DateFormatter.localizedFormatter(language: language)
         formatter.dateFormat = "MMMM yyyy"
         return formatter.string(from: firstDate)
     }

@@ -34,7 +34,7 @@ struct SettingsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Header")
+            Text("Header".localized(language))
                 .font(.headline)
                 .padding(.leading, 8)
                 .padding(.top, 16)
@@ -42,16 +42,17 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 // Language
                 HStack {
-                    Text("Language")
+                    Text("Language".localized(language))
                     Spacer()
                     Menu {
-                        Button("English") { language = "English" }
-                        Button("Indonesian") { language = "Indonesian" }
-                        Button("Chinese") { language = "Chinese" }
+                        Button("English".localized(language)) { language = "English" }
+                        Button("Indonesian".localized(language)) { language = "Indonesian" }
+                        Button("Chinese".localized(language)) { language = "Chinese" }
                     } label: {
                         HStack(spacing: 4) {
-                            Text(language)
+                            Text(language.localized(language))
                                 .foregroundColor(.gray)
+                                .font(.system(size: 14))
                             Image(systemName: "chevron.up.chevron.down")
                                 .font(.system(size: 10))
                                 .foregroundColor(.gray)
@@ -64,7 +65,7 @@ struct SettingsView: View {
                 
                 // Font Size
                 HStack {
-                    Text("Font Size")
+                    Text("Font Size".localized(language))
                     Spacer()
                     
                     Text("\(fontSize)")
@@ -104,7 +105,7 @@ struct SettingsView: View {
                 
                 // Light Mode
                 HStack {
-                    Toggle("Light Mode", isOn: $isLightMode)
+                    Toggle("Light Mode".localized(language), isOn: $isLightMode)
                         .tint(Color(hex: "#33C65B"))
                 }
                 .padding()
@@ -116,7 +117,7 @@ struct SettingsView: View {
                     Button {
                         showingConfirmAlert = true
                     } label: {
-                        Text("Confirm Action")
+                        Text("Confirm Action".localized(language))
                             .foregroundColor(Color(hex: "#33C65B"))
                             .frame(maxWidth: .infinity)
                     }
@@ -139,23 +140,11 @@ struct SettingsView: View {
             isLightMode = appIsLightMode
             initialIsLightMode = appIsLightMode
         }
-        .navigationTitle("Settings")
+        .navigationTitle("Settings".localized(language))
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 14, weight: .semibold))
-                        .frame(width: 36, height: 36)
-                }
-            }
-        }
-        .alert("Confirm Changes", isPresented: $showingConfirmAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Confirm") {
+        .alert("Confirm Changes".localized(language), isPresented: $showingConfirmAlert) {
+            Button("Cancel".localized(language), role: .cancel) { }
+            Button("Confirm".localized(language)) {
                 initialLanguage = language
                 initialFontSize = fontSize
                 initialIsLightMode = isLightMode
@@ -165,7 +154,7 @@ struct SettingsView: View {
                 appIsLightMode = isLightMode
             }
         } message: {
-            Text("Are you sure you want to apply these changes?")
+            Text("Are you sure you want to apply these changes?".localized(language))
         }
     }
 }

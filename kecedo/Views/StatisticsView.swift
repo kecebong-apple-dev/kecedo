@@ -11,6 +11,7 @@ import Charts
 
 struct StatisticsView: View {
     @Query private var tasks: [TaskModel]
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
     @State private var navigateToSettings = false
 
     private var completedTasks: [TaskModel] {
@@ -32,16 +33,26 @@ struct StatisticsView: View {
         
         if completed == 0 {
             if toComplete > 0 {
-                return ("Ready to start?", "Let's get things moving.", "You have \(toComplete) tasks ready to go.")
+                return ("Ready to start?".localized(appLanguage), 
+                        "Let's get things moving.".localized(appLanguage), 
+                        "You have %lld tasks ready to go.".localized(appLanguage, Int64(toComplete)))
             } else {
-                return ("All Caught Up", "No tasks on your plate.", "Enjoy your day!")
+                return ("All Caught Up".localized(appLanguage), 
+                        "No tasks on your plate.".localized(appLanguage), 
+                        "Enjoy your day!".localized(appLanguage))
             }
         } else if completed == 1 {
-            return ("Great Start!", "Good job getting started.", "You completed 1 task today.")
+            return ("Great Start!".localized(appLanguage), 
+                    "Good job getting started.".localized(appLanguage), 
+                    "You completed 1 task today.".localized(appLanguage))
         } else if completed <= 3 {
-            return ("Nice Progress", "Keep up the good work!", "You completed \(completed) tasks today.")
+            return ("Nice Progress".localized(appLanguage), 
+                    "Keep up the good work!".localized(appLanguage), 
+                    "You completed %lld tasks today.".localized(appLanguage, Int64(completed)))
         } else {
-            return ("Excellent Work", "You're crushing it today.", "You completed \(completed) tasks today.")
+            return ("Excellent Work".localized(appLanguage), 
+                    "You're crushing it today.".localized(appLanguage), 
+                    "You completed %lld tasks today.".localized(appLanguage, Int64(completed)))
         }
     }
 
@@ -60,13 +71,13 @@ struct StatisticsView: View {
                 }
             }
             .toolbarMain(
-                title: "Statistics",
+                title: "Statistics".localized(appLanguage),
                 items: .statistics,
                 onSettings: {
                     navigateToSettings = true
                 }
             )
-            .navigationTitle("Statistics")
+            .navigationTitle("Statistics".localized(appLanguage))
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(isPresented: $navigateToSettings) {
                 SettingsView()
@@ -76,12 +87,12 @@ struct StatisticsView: View {
 
     private var overviewCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Completed Task Overview")
+            Text("Completed Task Overview".localized(appLanguage))
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(Color(hex: "#222222"))
 
             if completedTasks.isEmpty {
-                Text("No completed tasks yet.")
+                Text("No completed tasks yet.".localized(appLanguage))
                     .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -91,7 +102,7 @@ struct StatisticsView: View {
                     let count = completedTasks.filter { $0.priority == priority }.count
                     
                     SectorMark(
-                        angle: .value("Completed", count),
+                        angle: .value("Completed".localized(appLanguage), count),
                         innerRadius: .ratio(0.55),
                         angularInset: 3.0
                     )
