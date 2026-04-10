@@ -29,7 +29,7 @@ struct CalendarView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                VStack(spacing: 0) {
+                VStack() {
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 18) {
                             CalendarCard(
@@ -52,15 +52,15 @@ struct CalendarView: View {
                                     }
                                 }
                             )
-                            
                             taskSection
                         }
                         .padding(.horizontal, 16)
-                        .padding(.top, -30)
+                        .padding(.top, 18)
                         .padding(.bottom, 136)
                     }
                 }
             }
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarMain(
                 title: "Calendar",
                 items: .calendar,
@@ -96,6 +96,7 @@ struct CalendarView: View {
             Text(selectedDateText)
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.black)
+                .padding(.horizontal, 16)
                 .padding(.top, 2)
             FilteredTaskListView(selectedDate: selectedDate, selectedTask: $selectedTask)
         }

@@ -149,13 +149,7 @@ struct SettingsView: View {
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.black)
                         .frame(width: 36, height: 36)
-                        .background(
-                            Circle()
-                                .fill(Color.white)
-                                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-                        )
                 }
             }
         }
