@@ -23,8 +23,8 @@ struct MatrixFilterState: Equatable {
     var showCompleted: Bool = true
 }
 
-extension Array where Element == TaskModel {
-    func applying(filter: MatrixFilterState) -> [TaskModel] {
+extension Array where Element == TaskEntity {
+    func applying(filter: MatrixFilterState) -> [TaskEntity] {
         self.filter { task in
             
             // Filter by completion status

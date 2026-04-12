@@ -6,11 +6,10 @@
 //
 
 import SwiftUI
-import SwiftData
+
 
 struct ContentView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "English"
-    @Environment(\.modelContext) private var modelContext
     
     var body: some View {
         TabView {
@@ -31,12 +30,6 @@ struct ContentView: View {
 }
 
 #Preview {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: TaskModel.self, configurations: config)
-
-    for task in TaskModel.dummyTasks {
-        container.mainContext.insert(task)
-    }
-    return ContentView()
-        .modelContainer(container)
+    ContentView()
+        .environment(DIContainer().taskViewModel)
 }

@@ -6,30 +6,15 @@
 //
 
 import SwiftUI
-import SwiftData
 import Charts
 
 struct StatisticsView: View {
-    @Query private var tasks: [TaskModel]
+    @Environment(StatisticsViewModel.self) private var statisticsViewModel
     @AppStorage("appLanguage") private var appLanguage: String = "English"
-    @State private var navigateToSettings = false
-
-    private var completedTasks: [TaskModel] {
-        tasks.filter { $0.isDone }
-    }
-    
-    private var tasksCompletedToday: Int {
-        completedTasks.filter { task in
-            if let completedAt = task.completedAt {
-                return Calendar.current.isDateInToday(completedAt)
-            }
-            return Calendar.current.isDateInToday(task.endDate)
-        }.count
-    }
     
     private var progressCardTexts: (title: String, subtitle: String, description: String) {
-        let completed = tasksCompletedToday
-        let toComplete = tasks.filter { !$0.isDone }.count
+        let completed = statisticsViewModel.tasksCompletedToday
+        let toComplete = statisticsViewModel.activeTasksCount
         
         if completed == 0 {
             if toComplete > 0 {
@@ -57,6 +42,7 @@ struct StatisticsView: View {
     }
 
     var body: some View {
+        @Bindable var viewModel = statisticsViewModel
         NavigationStack {
             ZStack {
                 ScrollView(showsIndicators: false) {
@@ -74,12 +60,12 @@ struct StatisticsView: View {
                 title: "Statistics".localized(appLanguage),
                 items: .statistics,
                 onSettings: {
-                    navigateToSettings = true
+                    viewModel.navigateToSettings = true
                 }
             )
             .navigationTitle("Statistics".localized(appLanguage))
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(isPresented: $navigateToSettings) {
+            .navigationDestination(isPresented: $viewModel.navigateToSettings) {
                 SettingsView()
             }
         }
@@ -91,7 +77,7 @@ struct StatisticsView: View {
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(Color(hex: "#222222"))
 
-            if completedTasks.isEmpty {
+            if statisticsViewModel.completedTasks.isEmpty {
                 Text("No completed tasks yet.".localized(appLanguage))
                     .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(.secondary)
@@ -99,7 +85,7 @@ struct StatisticsView: View {
                     .frame(height: 235)
             } else {
                 Chart(Priority.allCases.filter { $0 != .all }) { priority in
-                    let count = completedTasks.filter { $0.priority == priority }.count
+                    let count = statisticsViewModel.completedTasks.filter { $0.priority == priority }.count
                     
                     SectorMark(
                         angle: .value("Completed".localized(appLanguage), count),
@@ -122,7 +108,7 @@ struct StatisticsView: View {
     private var countCards: some View {
         HStack(spacing: 10) {
             ForEach(Priority.allCases.filter { $0 != .all }) { priority in
-                let count = completedTasks.filter { $0.priority == priority }.count
+                let count = statisticsViewModel.completedTasks.filter { $0.priority == priority }.count
                 
                 HStack(spacing: 8) {
                     MatrixGridBadge(priority: priority)
@@ -170,4 +156,6 @@ struct StatisticsView: View {
 
 #Preview {
     StatisticsView()
+        .environment(DIContainer().taskViewModel)
+        .environment(DIContainer().statisticsViewModel)
 }

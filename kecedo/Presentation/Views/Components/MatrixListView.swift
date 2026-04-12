@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 // MARK: - Extensions / Helpers
 extension DateFormatter {
@@ -55,68 +54,55 @@ private struct PrioritySelector: View {
 
 // MARK: - Main View
 struct MatrixListView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(MatrixViewModel.self) private var matrixViewModel
     @AppStorage("appLanguage") private var appLanguage: String = "English"
     
-    @Query(sort: \TaskModel.endDate) private var tasks: [TaskModel]
-    
-    var filterState: MatrixFilterState = MatrixFilterState()
     var onSettings: () -> Void = {}
     var onFilter: () -> Void = {}
     var onSwap: () -> Void = {}
     
-    @State private var showingAddTask = false
-    @State private var selectedPriority: Priority = .all
-    @State private var selectedTask: TaskModel? = nil
-    
-    private var filteredTasks: [TaskModel] {
-        let baseTasks = tasks.applying(filter: filterState)
-        if selectedPriority != .all {
-            return baseTasks.filter { $0.priority == selectedPriority }
-        } else {
-            return baseTasks
-        }
-    }
-    
     var body: some View {
+        @Bindable var viewModel = matrixViewModel
         VStack(spacing: 0) {
             ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
-                        PrioritySelector(selected: selectedPriority, onSelect: { selectedPriority = $0 })
+                        PrioritySelector(selected: viewModel.selectedPriority, onSelect: { viewModel.selectedPriority = $0 })
                             .padding(.top, 18)
                         
                         VStack(){
-                            Text(LocalizedStringKey(filterState.dateType.rawValue))
+                            Text(LocalizedStringKey(viewModel.filterState.dateType.rawValue))
                                 .font(.title2)
                                 .bold()
                                 .padding(.top, 8)
                             
-                            if(filterState.dateType == .period){
+                            if(viewModel.filterState.dateType == .period){
                                 HStack(spacing: 5){
-                                    Text(filterState.startDate, format: .dateTime.day().month().year())
+                                    Text(viewModel.filterState.startDate, format: .dateTime.day().month().year())
                                     Text("-")
-                                    Text(filterState.endDate, format: .dateTime.day().month().year())
+                                    Text(viewModel.filterState.endDate, format: .dateTime.day().month().year())
                                 }
                             }
                         }
                         
                         
                         LazyVStack(spacing: 12) {
-                            if filteredTasks.isEmpty {
+                            if viewModel.listTasks().isEmpty {
                                 Text("No tasks on this date.".localized(appLanguage))
                                     .foregroundColor(.gray)
                                     .padding(.top, 40)
                             } else {
-                                ForEach(filteredTasks) { task in
+                                ForEach(viewModel.listTasks()) { task in
                                     TaskRow(task: task,
                                             iconMode: task.priority,
                                             onToggle: {
                                                 withAnimation {
-                                                    task.toggleDone()
+                                                    var updatedTask = task
+                                                    updatedTask.toggleDone()
+                                                    matrixViewModel.updateTask(updatedTask)
                                                 }
                                             },
                                             onTap: {
-                                                selectedTask = task
+                                                viewModel.selectedTask = task
                                             })
                                 }
                             }
@@ -130,38 +116,22 @@ struct MatrixListView: View {
             .toolbarMain(
                 title: "Matrix List".localized(appLanguage),
                 items: .matrix,
-                showingAddTask: $showingAddTask,
+                showingAddTask: $viewModel.showingAddTask,
                 onSettings: onSettings,
                 onFilter: onFilter,
                 onSwap: onSwap
             )
-            .sheet(isPresented: $showingAddTask) {
+            .sheet(isPresented: $viewModel.showingAddTask) {
                 AddTaskView()
             }
-            .sheet(item: $selectedTask) { task in
+            .sheet(item: $viewModel.selectedTask) { task in
                 AddTaskView(taskToEdit: task)
             }
     }
 }
 
-// MARK: - Preview Setup
-@MainActor
-let previewContainer: ModelContainer = {
-    do {
-        let container = try ModelContainer(
-            for: TaskModel.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-        for task in TaskModel.dummyTasks {
-            container.mainContext.insert(task)
-        }
-        return container
-    } catch {
-        fatalError("Failed to create preview container: \(error)")
-    }
-}()
-
 #Preview {
     MatrixListView()
-        .modelContainer(previewContainer)
+        .environment(DIContainer().taskViewModel)
+        .environment(DIContainer().matrixViewModel)
 }

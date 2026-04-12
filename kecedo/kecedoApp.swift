@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 @main
 struct kecedoApp: App {
@@ -14,18 +13,7 @@ struct kecedoApp: App {
     @AppStorage("appFontSize") private var appFontSize: Int = 14
     @AppStorage("appIsLightMode") private var appIsLightMode: Bool = true
 
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            TaskModel.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    let diContainer = DIContainer()
     
     private func dynamicTypeSize(for size: Int) -> DynamicTypeSize {
         switch size {
@@ -46,7 +34,10 @@ struct kecedoApp: App {
                 .preferredColorScheme(appIsLightMode ? .light : .dark)
                 .environment(\.locale, Locale(identifier: appLanguage == "Indonesian" ? "id" : (appLanguage == "Chinese" ? "zh-Hans" : "en")))
                 .dynamicTypeSize(dynamicTypeSize(for: appFontSize))
+                .environment(diContainer.taskViewModel)
+                .environment(diContainer.calendarViewModel)
+                .environment(diContainer.matrixViewModel)
+                .environment(diContainer.statisticsViewModel)
         }
-        .modelContainer(sharedModelContainer)
     }
 }

@@ -6,15 +6,14 @@
 //
 
 import SwiftUI
-import SwiftData
 import Vision
 
 struct AddTaskView: View {
     @Environment(\.dismiss) var dismiss
-    @Environment(\.modelContext) var modelContext
+    @Environment(TaskViewModel.self) private var taskViewModel
     @AppStorage("appLanguage") private var appLanguage: String = "English"
     
-    var taskToEdit: TaskModel?
+    var taskToEdit: TaskEntity?
     
     @State private var title: String = ""
     @State private var desc: String = ""
@@ -43,7 +42,7 @@ struct AddTaskView: View {
         }
     }
     
-    init(taskToEdit: TaskModel? = nil) {
+    init(taskToEdit: TaskEntity? = nil) {
         self.taskToEdit = taskToEdit
         
         _title = State(initialValue: taskToEdit?.title ?? "")
@@ -242,15 +241,16 @@ struct AddTaskView: View {
     }
     
     private func saveTask(){
-        if let task = taskToEdit {
+        if var task = taskToEdit {
             task.title = title
             task.desc = desc
             task.startDate = startDate
             task.endDate = endDate
             task.priority = matrix
+            taskViewModel.updateTask(task)
         } else {
-            let newTask: TaskModel = TaskModel(title: title, desc: desc, startDate: startDate, endDate: endDate, priority: matrix, isDone: false)
-            modelContext.insert(newTask)
+            let newTask = TaskEntity(title: title, desc: desc, startDate: startDate, endDate: endDate, priority: matrix, isDone: false)
+            taskViewModel.addTask(newTask)
         }
         
         dismiss()
@@ -258,7 +258,7 @@ struct AddTaskView: View {
     
     private func deleteTask() {
         if let task = taskToEdit {
-            modelContext.delete(task)
+            taskViewModel.deleteTask(id: task.id)
             dismiss()
         }
     }
@@ -305,4 +305,5 @@ struct ImagePicker: UIViewControllerRepresentable {
 
 #Preview {
     AddTaskView()
+        .environment(DIContainer().taskViewModel)
 }

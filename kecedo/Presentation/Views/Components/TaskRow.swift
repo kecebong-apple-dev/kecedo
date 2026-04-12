@@ -10,7 +10,7 @@ import SwiftUI
 
 struct TaskRow: View {
     @AppStorage("appLanguage") private var appLanguage: String = "English"
-    let task: TaskModel
+    let task: TaskEntity
     let iconMode: Priority
     let onToggle: () -> Void
     var onTap: (() -> Void)? = nil

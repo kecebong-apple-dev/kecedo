@@ -6,30 +6,21 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct CalendarView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "English"
-    @State private var currentMonth = Foundation.Calendar.current.date(
-        from: Foundation.Calendar.current.dateComponents([.year, .month], from: .now)
-    ) ?? .now
-    @State private var isMonthPickerPresented = false
-    @State private var selectedDate: Date = Foundation.Calendar.current.startOfDay(for: .now)
-    
-    @State private var showingAddTask = false
-    @State private var selectedTask: TaskModel? = nil
-    @State private var filterState = MatrixFilterState()
-    
-    @State private var showingFilter = false
-    @State private var navigateToSettings = false
+    @Environment(CalendarViewModel.self) private var calendarViewModel
+    @Environment(TaskViewModel.self) private var taskViewModel
 
-    @Query private var tasks: [TaskModel]
+    @State private var showingAddTask = false
+    @State private var selectedTask: TaskEntity? = nil
 
     private var displayedMonth: CalendarMonth {
-        CalendarMonth(date: currentMonth)
+        CalendarMonth(date: calendarViewModel.currentMonth)
     }
 
     var body: some View {
+        @Bindable var viewModel = calendarViewModel
         NavigationStack {
             ZStack {
                 VStack() {
@@ -37,22 +28,22 @@ struct CalendarView: View {
                         VStack(spacing: 18) {
                             CalendarCard(
                                 month: displayedMonth,
-                                selectedDate: selectedDate,
-                                tasks: tasks,
-                                onTapMonthLabel: { isMonthPickerPresented = true },
+                                selectedDate: viewModel.selectedDate,
+                                tasks: viewModel.tasks,
+                                onTapMonthLabel: { viewModel.isMonthPickerPresented = true },
                                 onSelectDay: { day in
                                     if let date = displayedMonth.date(for: day) {
-                                        selectedDate = date
+                                        viewModel.selectedDate = date
                                     }
                                 },
                                 onPreviousMonth: {
-                                    if let previousMonth = Foundation.Calendar.current.date(byAdding: .month, value: -1, to: currentMonth) {
-                                        updateCurrentMonth(to: previousMonth)
+                                    if let previousMonth = Foundation.Calendar.current.date(byAdding: .month, value: -1, to: viewModel.currentMonth) {
+                                        viewModel.updateCurrentMonth(to: previousMonth)
                                     }
                                 },
                                 onNextMonth: {
-                                    if let nextMonth = Foundation.Calendar.current.date(byAdding: .month, value: 1, to: currentMonth) {
-                                        updateCurrentMonth(to: nextMonth)
+                                    if let nextMonth = Foundation.Calendar.current.date(byAdding: .month, value: 1, to: viewModel.currentMonth) {
+                                        viewModel.updateCurrentMonth(to: nextMonth)
                                     }
                                 },
                                 appLanguage: appLanguage
@@ -70,14 +61,14 @@ struct CalendarView: View {
                 title: "Calendar".localized(appLanguage),
                 items: .calendar,
                 showingAddTask: $showingAddTask,
-                onSettings: { navigateToSettings = true },
+                onSettings: { viewModel.navigateToSettings = true },
             )
-            .sheet(isPresented: $isMonthPickerPresented) {
+            .sheet(isPresented: $viewModel.isMonthPickerPresented) {
                 MonthYearPickerSheet(
-                    selectedMonth: currentMonth,
+                    selectedMonth: viewModel.currentMonth,
                     onSelect: { newMonth in
-                        updateCurrentMonth(to: newMonth)
-                        isMonthPickerPresented = false
+                        viewModel.updateCurrentMonth(to: newMonth)
+                        viewModel.isMonthPickerPresented = false
                     }
                 )
                 .presentationDetents([.height(320)])
@@ -90,7 +81,7 @@ struct CalendarView: View {
             .sheet(item: $selectedTask) { task in
                 AddTaskView(taskToEdit: task)
             }
-            .navigationDestination(isPresented: $navigateToSettings) {
+            .navigationDestination(isPresented: $viewModel.navigateToSettings) {
                 SettingsView()
             }
         }
@@ -103,76 +94,48 @@ struct CalendarView: View {
                 .foregroundStyle(.black)
                 .padding(.horizontal, 16)
                 .padding(.top, 2)
-            FilteredTaskListView(selectedDate: selectedDate, selectedTask: $selectedTask, appLanguage: appLanguage)
+            FilteredTaskListView(selectedDate: calendarViewModel.selectedDate, selectedTask: $selectedTask, appLanguage: appLanguage, filteredTasks: calendarViewModel.filteredTasks(for: calendarViewModel.selectedDate))
         }
     }
 
     private var selectedDateText: String {
         let formatter = DateFormatter.localizedFormatter(language: appLanguage)
         formatter.dateFormat = "EEEE, d MMMM yyyy"
-        return formatter.string(from: selectedDate)
-    }
-
-    private func updateCurrentMonth(to newMonth: Date) {
-        let calendar = Foundation.Calendar.current
-        let normalizedMonth = calendar.date(
-            from: calendar.dateComponents([.year, .month], from: newMonth)
-        ) ?? newMonth
-
-        currentMonth = normalizedMonth
-
-        let selectedDay = calendar.component(.day, from: selectedDate)
-        let dayRange = calendar.range(of: .day, in: .month, for: normalizedMonth) ?? 1..<29
-        let clampedDay = min(selectedDay, dayRange.count)
-
-        if let updatedSelectedDate = calendar.date(
-            from: DateComponents(
-                year: calendar.component(.year, from: normalizedMonth),
-                month: calendar.component(.month, from: normalizedMonth),
-                day: clampedDay
-            )
-        ) {
-            selectedDate = calendar.startOfDay(for: updatedSelectedDate)
-        }
+        return formatter.string(from: calendarViewModel.selectedDate)
     }
 }
 
 // MARK: - Supporting Components
 
 struct FilteredTaskListView: View {
-    @Query private var tasks: [TaskModel]
-    @Binding private var selectedTask: TaskModel?
+    @Environment(TaskViewModel.self) private var taskViewModel
+    @Binding private var selectedTask: TaskEntity?
     let appLanguage: String
+    let selectedDate: Date
     
-    init(selectedDate: Date, selectedTask: Binding<TaskModel?>, appLanguage: String) {
-        print(appLanguage)
+    let filteredTasks: [TaskEntity]
+    
+    init(selectedDate: Date, selectedTask: Binding<TaskEntity?>, appLanguage: String, filteredTasks: [TaskEntity]) {
+        self.selectedDate = selectedDate
         self._selectedTask = selectedTask
         self.appLanguage = appLanguage
-        
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: selectedDate)
-        
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
-        
-        let filterPredicate = #Predicate<TaskModel> { task in
-            task.endDate >= startOfDay && task.endDate < endOfDay
-        }
-        
-        _tasks = Query(filter: filterPredicate, sort: \TaskModel.endDate)
+        self.filteredTasks = filteredTasks
     }
     
     var body: some View {
         LazyVStack(spacing:12) {
-            if tasks.isEmpty {
+            if filteredTasks.isEmpty {
                 Text("No tasks on this date.".localized(appLanguage))
                     .foregroundColor(.gray)
             } else {
-                ForEach(tasks) { task in
+                ForEach(filteredTasks) { task in
                     TaskRow(task: task,
                             iconMode: task.priority,
                             onToggle: {
                                 withAnimation {
-                                    task.toggleDone()
+                                    var updatedTask = task
+                                    updatedTask.toggleDone()
+                                    taskViewModel.updateTask(updatedTask)
                                 }
                             },
                             onTap: {
@@ -188,7 +151,7 @@ struct FilteredTaskListView: View {
 private struct CalendarCard: View {
     let month: CalendarMonth
     let selectedDate: Date
-    let tasks: [TaskModel]
+    let tasks: [TaskEntity]
     let onTapMonthLabel: () -> Void
     let onSelectDay: (Int) -> Void
     let onPreviousMonth: () -> Void
@@ -568,4 +531,6 @@ private struct CalendarMonth {
 
 #Preview {
     CalendarView()
+        .environment(DIContainer().taskViewModel)
+        .environment(DIContainer().calendarViewModel)
 }

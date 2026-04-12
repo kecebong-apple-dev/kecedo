@@ -6,15 +6,14 @@
 //
 
 import SwiftUI
-import SwiftData
 
 // MARK: Quadrant Cell
 
 private struct QuadrantCellView: View {
     let priority: Priority
-    let tasks: [TaskModel]
-    let onToggle: (TaskModel) -> Void
-    let onTap: (TaskModel) -> Void
+    let tasks: [TaskEntity]
+    let onToggle: (TaskEntity) -> Void
+    let onTap: (TaskEntity) -> Void
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -44,7 +43,7 @@ private struct QuadrantCellView: View {
 // MARK: Task Row
 
 private struct TaskRowView: View {
-    let task: TaskModel
+    let task: TaskEntity
     let priority: Priority
     let onToggle: () -> Void
     let onTap: () -> Void
@@ -98,14 +97,8 @@ private struct TaskRowView: View {
 struct MatrixView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "English"
 
-    // Fetch all tasks from SwiftData; sort by endDate ascending
-    @Query(sort: \TaskModel.endDate) private var allTasks: [TaskModel]
-    @Environment(\.modelContext) private var context
-
-    @State private var showingAddTask = false
-    @State private var selectedTask: TaskModel? = nil
+    @Environment(MatrixViewModel.self) private var matrixViewModel
     
-    var filterState: MatrixFilterState = MatrixFilterState()
     var onSettings: () -> Void = {}
     var onFilter: () -> Void = {}
     var onSwap: () -> Void = {}
@@ -115,11 +108,12 @@ struct MatrixView: View {
     }
 
     // Helper: filter tasks per priority quadrant
-    private func tasks(for priority: Priority) -> [TaskModel] {
-        allTasks.applying(filter: filterState).filter { $0.priority == priority }
+    private func tasks(for priority: Priority) -> [TaskEntity] {
+        matrixViewModel.tasks(for: priority)
     }
 
     var body: some View {
+        @Bindable var viewModel = matrixViewModel
         VStack(spacing: 0) {
                 // ── Grid ──────────────────────────────────────────────────────────
                 GeometryReader { geo in
@@ -162,7 +156,7 @@ struct MatrixView: View {
                                         priority: .doFirst,
                                         tasks: tasks(for: .doFirst),
                                         onToggle: toggleDone,
-                                        onTap: { selectedTask = $0 }
+                                        onTap: { viewModel.selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
 
@@ -170,7 +164,7 @@ struct MatrixView: View {
                                         priority: .schedule,
                                         tasks: tasks(for: .schedule),
                                         onToggle: toggleDone,
-                                        onTap: { selectedTask = $0 }
+                                        onTap: { viewModel.selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
                                 }
@@ -179,7 +173,7 @@ struct MatrixView: View {
                                         priority: .delegate,
                                         tasks: tasks(for: .delegate),
                                         onToggle: toggleDone,
-                                        onTap: { selectedTask = $0 }
+                                        onTap: { viewModel.selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
 
@@ -187,7 +181,7 @@ struct MatrixView: View {
                                         priority: .eliminate,
                                         tasks: tasks(for: .eliminate),
                                         onToggle: toggleDone,
-                                        onTap: { selectedTask = $0 }
+                                        onTap: { viewModel.selectedTask = $0 }
                                     )
                                     .frame(width: cellW, height: cellH)
                                 }
@@ -202,17 +196,15 @@ struct MatrixView: View {
             .toolbarMain(
                 title: "Matrix".localized(appLanguage),
                 items: .matrix,
-                showingAddTask: $showingAddTask,
+                showingAddTask: $viewModel.showingAddTask,
                 onSettings: onSettings,
                 onFilter: onFilter,
                 onSwap: onSwap
             )
-            // Add new task
-            .sheet(isPresented: $showingAddTask) {
+            .sheet(isPresented: $viewModel.showingAddTask) {
                 AddTaskView()
             }
-            // Edit existing task
-            .sheet(item: $selectedTask) { task in
+            .sheet(item: $viewModel.selectedTask) { task in
                 AddTaskView(taskToEdit: task)
             }
     }
@@ -230,19 +222,15 @@ struct MatrixView: View {
             .clipped()
     }
 
-    private func toggleDone(_ task: TaskModel) {
-        task.toggleDone()
+    private func toggleDone(_ task: TaskEntity) {
+        var mutableTask = task
+        mutableTask.toggleDone()
+        matrixViewModel.updateTask(mutableTask)
     }
 }
 
 #Preview {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: TaskModel.self, configurations: config)
-
-    for task in TaskModel.dummyTasks {
-        container.mainContext.insert(task)
-    }
-
-    return MatrixView()
-        .modelContainer(container)
+    MatrixView()
+        .environment(DIContainer().taskViewModel)
+        .environment(DIContainer().matrixViewModel)
 }

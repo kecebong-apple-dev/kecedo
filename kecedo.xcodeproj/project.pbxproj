@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		933874B2BFD14B8BB299F71F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 8697061576094906BD99F71F /* README.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		1D0775902F83097B008A7F0D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,10 +28,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		8697061576094906BD99F71F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		1D0775802F83097A008A7F0D /* kecedo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kecedo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D07758F2F83097B008A7F0D /* kecedoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = kecedoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D0775992F83097B008A7F0D /* kecedoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = kecedoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8697061576094906BD99F71F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -210,18 +214,13 @@
 			);
 		};
 /* End PBXProject section */
-/* Begin PBXBuildRule section */
-/* End PBXBuildRule section */
-/* Begin PBXBuildFile section */
-		933874B2BFD14B8BB299F71F /* README.md */ = {isa = PBXBuildFile; fileRef = 8697061576094906BD99F71F; };
-/* End PBXBuildFile section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1D07757E2F83097A008A7F0D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				933874B2BFD14B8BB299F71F /* README.md */,
+				933874B2BFD14B8BB299F71F /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,9 +239,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1D07757C2F83097A008A7F0D /* Sources */ = {
