@@ -3,7 +3,9 @@ import Observation
 
 @Observable
 class CalendarViewModel {
-    var tasks: [TaskEntity] = []
+    var tasks: [TaskEntity] {
+        taskViewModel.tasks
+    }
     
     var currentMonth: Date
     var selectedDate: Date
@@ -11,34 +13,19 @@ class CalendarViewModel {
     var showingFilter = false
     var navigateToSettings = false
     
-    private let repository: TaskRepositoryProtocol
+    private let taskViewModel: TaskViewModel
     
-    init(repository: TaskRepositoryProtocol) {
-        self.repository = repository
+    init(taskViewModel: TaskViewModel) {
+        self.taskViewModel = taskViewModel
         
         // Setup initial dates
         let calendar = Calendar.current
         self.currentMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: .now)) ?? .now
         self.selectedDate = calendar.startOfDay(for: .now)
-        
-        fetchTasks()
-    }
-    
-    func fetchTasks() {
-        do {
-            self.tasks = try repository.getTasks()
-        } catch {
-            print("Failed to fetch tasks: \(error)")
-        }
     }
     
     func updateTask(_ task: TaskEntity) {
-        do {
-            try repository.updateTask(task)
-            fetchTasks()
-        } catch {
-            print("Failed to update task: \(error)")
-        }
+        taskViewModel.updateTask(task)
     }
     
     func updateCurrentMonth(to newMonth: Date) {

@@ -3,22 +3,15 @@ import Observation
 
 @Observable
 class StatisticsViewModel {
-    var tasks: [TaskEntity] = []
+    var tasks: [TaskEntity] {
+        taskViewModel.tasks
+    }
     var navigateToSettings = false
     
-    private let repository: TaskRepositoryProtocol
+    private let taskViewModel: TaskViewModel
     
-    init(repository: TaskRepositoryProtocol) {
-        self.repository = repository
-        fetchTasks()
-    }
-    
-    func fetchTasks() {
-        do {
-            self.tasks = try repository.getTasks()
-        } catch {
-            print("Failed to fetch tasks: \(error)")
-        }
+    init(taskViewModel: TaskViewModel) {
+        self.taskViewModel = taskViewModel
     }
     
     var completedTasks: [TaskEntity] {

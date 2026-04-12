@@ -17,10 +17,11 @@ class DIContainer {
             let context = ModelContext(container)
             let repository = SwiftDataTaskRepository(context: context)
             self.taskRepository = repository
-            self.taskViewModel = TaskViewModel(repository: repository)
-            self.calendarViewModel = CalendarViewModel(repository: repository)
-            self.matrixViewModel = MatrixViewModel(repository: repository)
-            self.statisticsViewModel = StatisticsViewModel(repository: repository)
+            let taskVM = TaskViewModel(repository: repository)
+            self.taskViewModel = taskVM
+            self.calendarViewModel = CalendarViewModel(taskViewModel: taskVM)
+            self.matrixViewModel = MatrixViewModel(taskViewModel: taskVM)
+            self.statisticsViewModel = StatisticsViewModel(taskViewModel: taskVM)
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }

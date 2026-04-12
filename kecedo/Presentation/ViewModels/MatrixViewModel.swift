@@ -3,7 +3,9 @@ import Observation
 
 @Observable
 class MatrixViewModel {
-    var tasks: [TaskEntity] = []
+    var tasks: [TaskEntity] {
+        taskViewModel.tasks
+    }
     var filterState = MatrixFilterState()
     
     // UI state
@@ -14,28 +16,14 @@ class MatrixViewModel {
     var selectedTask: TaskEntity? = nil
     var selectedPriority: Priority = .all
     
-    private let repository: TaskRepositoryProtocol
+    private let taskViewModel: TaskViewModel
     
-    init(repository: TaskRepositoryProtocol) {
-        self.repository = repository
-        fetchTasks()
-    }
-    
-    func fetchTasks() {
-        do {
-            self.tasks = try repository.getTasks()
-        } catch {
-            print("Failed to fetch tasks: \(error)")
-        }
+    init(taskViewModel: TaskViewModel) {
+        self.taskViewModel = taskViewModel
     }
     
     func updateTask(_ task: TaskEntity) {
-        do {
-            try repository.updateTask(task)
-            fetchTasks()
-        } catch {
-            print("Failed to update task: \(error)")
-        }
+        taskViewModel.updateTask(task)
     }
     
     func tasks(for priority: Priority) -> [TaskEntity] {
