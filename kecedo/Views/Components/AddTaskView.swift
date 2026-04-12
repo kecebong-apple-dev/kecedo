@@ -178,10 +178,8 @@ struct AddTaskView: View {
                         } label: {
                             Image(systemName: "xmark")
                         }
-                        .foregroundColor(.white)
-                        .padding(4)
-                        .background(Color.gray.opacity(0.4))
-                        .clipShape(Circle())
+                        .buttonStyle(.borderedProminent)
+                        .tint(.gray.opacity(0.8))
                         .confirmationDialog("Discard Changes".localized(appLanguage), isPresented: $showDiscardConfirmation, titleVisibility: .visible) {
                             Button("Discard".localized(appLanguage), role: .destructive) {
                                 dismiss()
@@ -197,10 +195,8 @@ struct AddTaskView: View {
                         } label: {
                             Image(systemName: "checkmark")
                         }
+                        .buttonStyle(.glassProminent)
                         .foregroundColor(.white)
-                        .padding(4)
-                        .background(Color.accentColor)
-                        .clipShape(Circle())
                     }
                 }
                 .presentationDetents(taskToEdit == nil ? [.medium, .large] : [.large])

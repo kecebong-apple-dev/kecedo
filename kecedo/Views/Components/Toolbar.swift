@@ -77,8 +77,8 @@ struct ToolbarMain: ViewModifier {
                     ToolbarItem() {
                         Button { showingAddTask = true } label: {
                             Image(systemName: "plus")
-                                .foregroundColor(.primary)
                         }
+                        .buttonStyle(.glassProminent)
                     }
                 }
             }

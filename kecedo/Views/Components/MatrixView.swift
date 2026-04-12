@@ -121,18 +121,6 @@ struct MatrixView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-
-            // ── Manual large title (inline nav bar = no UIKit scroll hijack) ──
-                HStack {
-                    Text("Matrix".localized(appLanguage))
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 4)
-                .padding(.bottom, 4)
-
                 // ── Grid ──────────────────────────────────────────────────────────
                 GeometryReader { geo in
                     let hPad:    CGFloat = 12
@@ -212,7 +200,7 @@ struct MatrixView: View {
             .padding(.bottom, 10)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarMain(
-                title: "Matrix",
+                title: "Matrix".localized(appLanguage),
                 items: .matrix,
                 showingAddTask: $showingAddTask,
                 onSettings: onSettings,

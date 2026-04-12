@@ -47,19 +47,18 @@ struct MatrixFilterView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 20))
-                            .foregroundColor(.blue)
+                        Image(systemName: "checkmark")
                     }
+                    .buttonStyle(.glassProminent)
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 20))
-                            .foregroundColor(.gray.opacity(0.5))
+                        Image(systemName: "xmark")
                     }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.gray.opacity(0.8))
                 }
             }
         }

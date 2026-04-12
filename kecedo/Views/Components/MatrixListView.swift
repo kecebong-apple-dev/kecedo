@@ -80,19 +80,6 @@ struct MatrixListView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            
-            // Manual large title used alongside inline nav bar 
-            // to prevent default UIKit scroll hijacking behaviors
-            HStack {
-                Text("Matrix".localized(appLanguage))
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 4)
-            .padding(.bottom, 4)
-            
             ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         PrioritySelector(selected: selectedPriority, onSelect: { selectedPriority = $0 })
@@ -141,7 +128,7 @@ struct MatrixListView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbarMain(
-                title: "Matrix",
+                title: "Matrix List".localized(appLanguage),
                 items: .matrix,
                 showingAddTask: $showingAddTask,
                 onSettings: onSettings,
