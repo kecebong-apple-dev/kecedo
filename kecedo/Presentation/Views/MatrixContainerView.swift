@@ -8,41 +8,37 @@
 import SwiftUI
 
 struct MatrixContainerView: View {
-    @State private var isListView = false
-    @State private var filterState = MatrixFilterState()
-    
-    @State private var showingFilter = false
-    @State private var navigateToSettings = false
+    @Environment(MatrixViewModel.self) private var matrixViewModel
     
     var body: some View {
+        @Bindable var viewModel = matrixViewModel
         NavigationStack {
             Group {
-                if isListView {
+                if viewModel.isListView {
                     MatrixListView(
-                        filterState: filterState,
-                        onSettings: { navigateToSettings = true },
-                        onFilter: { showingFilter = true },
-                        onSwap: { isListView.toggle() }
+                        onSettings: { viewModel.navigateToSettings = true },
+                        onFilter: { viewModel.showingFilter = true },
+                        onSwap: { viewModel.isListView.toggle() }
                     )
                 } else {
                     MatrixView(
-                        filterState: filterState,
-                        onSettings: { navigateToSettings = true },
-                        onFilter: { showingFilter = true },
-                        onSwap: { isListView.toggle() }
+                        onSettings: { viewModel.navigateToSettings = true },
+                        onFilter: { viewModel.showingFilter = true },
+                        onSwap: { viewModel.isListView.toggle() }
                     )
                 }
             }
-            .navigationDestination(isPresented: $navigateToSettings) {
+            .navigationDestination(isPresented: $viewModel.navigateToSettings) {
                 SettingsView()
             }
         }
-        .sheet(isPresented: $showingFilter) {
-            MatrixFilterView(filterState: $filterState)
+        .sheet(isPresented: $viewModel.showingFilter) {
+            MatrixFilterView(filterState: $viewModel.filterState)
         }
     }
 }
 
 #Preview {
     MatrixContainerView()
+        .environment(DIContainer().matrixViewModel)
 }

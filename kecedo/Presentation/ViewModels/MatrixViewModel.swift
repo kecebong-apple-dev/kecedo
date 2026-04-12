@@ -7,6 +7,9 @@ class MatrixViewModel {
     var filterState = MatrixFilterState()
     
     // UI state
+    var isListView = false
+    var showingFilter = false
+    var navigateToSettings = false
     var showingAddTask = false
     var selectedTask: TaskEntity? = nil
     var selectedPriority: Priority = .all
