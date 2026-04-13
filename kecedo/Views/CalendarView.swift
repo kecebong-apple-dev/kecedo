@@ -22,13 +22,13 @@ struct CalendarView: View {
     
     @State private var showingFilter = false
     @State private var navigateToSettings = false
-
+    
     @Query private var tasks: [TaskModel]
-
+    
     private var displayedMonth: CalendarMonth {
         CalendarMonth(date: currentMonth)
     }
-
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -106,25 +106,25 @@ struct CalendarView: View {
             FilteredTaskListView(selectedDate: selectedDate, selectedTask: $selectedTask, appLanguage: appLanguage)
         }
     }
-
+    
     private var selectedDateText: String {
         let formatter = DateFormatter.localizedFormatter(language: appLanguage)
         formatter.dateFormat = "EEEE, d MMMM yyyy"
         return formatter.string(from: selectedDate)
     }
-
+    
     private func updateCurrentMonth(to newMonth: Date) {
         let calendar = Foundation.Calendar.current
         let normalizedMonth = calendar.date(
             from: calendar.dateComponents([.year, .month], from: newMonth)
         ) ?? newMonth
-
+        
         currentMonth = normalizedMonth
-
+        
         let selectedDay = calendar.component(.day, from: selectedDate)
         let dayRange = calendar.range(of: .day, in: .month, for: normalizedMonth) ?? 1..<29
         let clampedDay = min(selectedDay, dayRange.count)
-
+        
         if let updatedSelectedDate = calendar.date(
             from: DateComponents(
                 year: calendar.component(.year, from: normalizedMonth),
@@ -158,8 +158,13 @@ struct FilteredTaskListView: View {
             task.endDate >= startOfDay && task.endDate < endOfDay
         }
         
-        _tasks = Query(filter: filterPredicate, sort: \TaskModel.endDate)
-    }
+        _tasks = Query(
+            filter: filterPredicate,
+            sort: [
+                SortDescriptor(\TaskModel.isDone, order: .forward),
+                SortDescriptor(\TaskModel.endDate, order: .forward)
+            ]
+        )    }
     
     var body: some View {
         LazyVStack(spacing:12) {
@@ -171,13 +176,13 @@ struct FilteredTaskListView: View {
                     TaskRow(task: task,
                             iconMode: task.priority,
                             onToggle: {
-                                withAnimation {
-                                    task.toggleDone()
-                                }
-                            },
+                        withAnimation {
+                            task.toggleDone()
+                        }
+                    },
                             onTap: {
-                                selectedTask = task
-                            })
+                        selectedTask = task
+                    })
                 }
                 
             }
@@ -194,13 +199,13 @@ private struct CalendarCard: View {
     let onPreviousMonth: () -> Void
     let onNextMonth: () -> Void
     let appLanguage: String
-
+    
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
     private var weekSymbols: [String] {
         let formatter = DateFormatter.localizedFormatter(language: appLanguage)
         return formatter.shortWeekdaySymbols.map { $0.uppercased() }
     }
-
+    
     private var tasksByDay: [Int: [Priority]] {
         var dict: [Int: Set<Priority>] = [:]
         let calendar = Foundation.Calendar.current
@@ -219,7 +224,7 @@ private struct CalendarCard: View {
         }
         return result
     }
-
+    
     var body: some View {
         let dayPriorities = tasksByDay
         
@@ -236,9 +241,9 @@ private struct CalendarCard: View {
                     }
                 }
                 .buttonStyle(.plain)
-
+                
                 Spacer()
-
+                
                 HStack(spacing: 22) {
                     Button(action: onPreviousMonth) {
                         Image(systemName: "chevron.left")
@@ -250,7 +255,7 @@ private struct CalendarCard: View {
                 .foregroundStyle(.blue)
                 .font(.system(size: 19, weight: .semibold))
             }
-
+            
             LazyVGrid(columns: columns, spacing: 10) {
                 ForEach(weekSymbols, id: \.self) { symbol in
                     Text(symbol)
@@ -258,7 +263,7 @@ private struct CalendarCard: View {
                         .foregroundStyle(Color.primary.opacity(0.22))
                         .frame(maxWidth: .infinity)
                 }
-
+                
                 ForEach(month.cells) { cell in
                     if let day = cell.day {
                         CalendarDateCell(
@@ -288,7 +293,7 @@ private struct CalendarDateCell: View {
     let isSelected: Bool
     let priorities: [Priority]
     let onTap: () -> Void
-
+    
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: 4) {
@@ -298,7 +303,7 @@ private struct CalendarDateCell: View {
                     .frame(width: 42, height: 42)
                     .background(isSelected ? Color.blue.opacity(0.14) : Color.clear)
                     .clipShape(Circle())
-                    
+                
                 HStack(spacing: 3) {
                     if priorities.isEmpty {
                         Circle()
@@ -321,7 +326,7 @@ private struct CalendarDateCell: View {
 
 private struct CircleIconButton: View {
     let systemImage: String
-
+    
     var body: some View {
         Button(action: {}) {
             Image(systemName: systemImage)
@@ -342,19 +347,19 @@ private struct CircleIconButton: View {
 
 private struct TaskGridIcon: View {
     let taskColor: Color
-
-    private let inactiveStroke = Color.primary.opacity(0.10)
+    
+    private let inactiveStroke = Color.black.opacity(0.10)
     private let squareSize: CGFloat = 11
     private let cornerRadius: CGFloat = 4
     private let spacing: CGFloat = 4
-
+    
     var body: some View {
         VStack(spacing: spacing) {
             HStack(spacing: spacing) {
                 gridSquare(color: color(for: .topLeft))
                 gridSquare(color: color(for: .topRight))
             }
-
+            
             HStack(spacing: spacing) {
                 gridSquare(color: color(for: .bottomLeft))
                 gridSquare(color: color(for: .bottomRight))
@@ -362,7 +367,7 @@ private struct TaskGridIcon: View {
         }
         .frame(width: 26, height: 26)
     }
-
+    
     private func gridSquare(color: Color?) -> some View {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             .fill(color ?? .clear)
@@ -372,7 +377,7 @@ private struct TaskGridIcon: View {
             }
             .frame(width: squareSize, height: squareSize)
     }
-
+    
     private func color(for position: GridPosition) -> Color? {
         switch normalizedTaskColor {
         case .green:
@@ -387,7 +392,7 @@ private struct TaskGridIcon: View {
             nil
         }
     }
-
+    
     private var normalizedTaskColor: NormalizedTaskColor {
         if taskColor == .green {
             return .green
@@ -401,17 +406,17 @@ private struct TaskGridIcon: View {
         if taskColor == .orange || taskColor == .red {
             return .orange
         }
-
+        
         return .inactive
     }
-
+    
     private enum GridPosition {
         case topLeft
         case topRight
         case bottomLeft
         case bottomRight
     }
-
+    
     private enum NormalizedTaskColor {
         case green
         case blue
@@ -425,26 +430,26 @@ private struct MonthYearPickerSheet: View {
     @AppStorage("appLanguage") private var appLanguage: String = "English"
     let selectedMonth: Date
     let onSelect: (Date) -> Void
-
+    
     @Environment(\.dismiss) private var dismiss
     @State private var monthIndex: Int
     @State private var year: Int
-
+    
     private var months: [String] {
         DateFormatter.localizedFormatter(language: appLanguage).monthSymbols
     }
     private let yearRange = Array(2020...2035)
-
+    
     init(selectedMonth: Date, onSelect: @escaping (Date) -> Void) {
         self.selectedMonth = selectedMonth
         self.onSelect = onSelect
-
+        
         let calendar = Foundation.Calendar.current
         let components = calendar.dateComponents([.month, .year], from: selectedMonth)
         _monthIndex = State(initialValue: max((components.month ?? 1) - 1, 0))
         _year = State(initialValue: components.year ?? 2025)
     }
-
+    
     var body: some View {
         VStack(spacing: 18) {
             HStack {
@@ -462,7 +467,7 @@ private struct MonthYearPickerSheet: View {
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                 .foregroundStyle(.blue)
             }
-
+            
             HStack(spacing: 0) {
                 Picker("Month".localized(appLanguage), selection: $monthIndex) {
                     ForEach(Array(months.enumerated()), id: \.offset) { index, month in
@@ -470,7 +475,7 @@ private struct MonthYearPickerSheet: View {
                     }
                 }
                 .pickerStyle(.wheel)
-
+                
                 Picker("Year".localized(appLanguage), selection: $year) {
                     ForEach(yearRange, id: \.self) { year in
                         Text(verbatim: String(year)).tag(year)
@@ -491,48 +496,48 @@ private struct CalendarMonth {
         let id = UUID()
         let day: Int?
     }
-
+    
     let year: Int
     let month: Int
-
+    
     static var current: CalendarMonth {
         let components = Foundation.Calendar.current.dateComponents([.year, .month], from: .now)
         return CalendarMonth(year: components.year ?? 2025, month: components.month ?? 1)
     }
-
+    
     static var monthSymbols: [String] {
         let formatter = DateFormatter()
         return formatter.monthSymbols
     }
-
+    
     init(year: Int, month: Int) {
         self.year = year
         self.month = month
     }
-
+    
     init(date: Date) {
         let components = Foundation.Calendar.current.dateComponents([.year, .month], from: date)
         self.year = components.year ?? 2025
         self.month = components.month ?? 1
     }
-
+    
     func title(language: String) -> String {
         let formatter = DateFormatter.localizedFormatter(language: language)
         formatter.dateFormat = "MMMM yyyy"
         return formatter.string(from: firstDate)
     }
-
+    
     var cells: [Cell] {
         let calendar = Foundation.Calendar.current
         let firstWeekdayIndex = calendar.component(.weekday, from: firstDate) - 1
         let dayRange = calendar.range(of: .day, in: .month, for: firstDate) ?? 1..<31
-
+        
         let leadingCells = Array(repeating: Cell(day: nil), count: firstWeekdayIndex)
         let dayCells = dayRange.map { Cell(day: $0) }
-
+        
         return leadingCells + dayCells
     }
-
+    
     func offset(by value: Int) -> CalendarMonth {
         let calendar = Foundation.Calendar.current
         guard
@@ -540,26 +545,26 @@ private struct CalendarMonth {
         else {
             return self
         }
-
+        
         let components = calendar.dateComponents([.year, .month], from: offsetDate)
         return CalendarMonth(year: components.year ?? year, month: components.month ?? month)
     }
-
+    
     func date(for day: Int) -> Date? {
         Foundation.Calendar.current.date(
             from: DateComponents(year: year, month: month, day: day)
         )
         .map { Foundation.Calendar.current.startOfDay(for: $0) }
     }
-
+    
     func isSelected(day: Int, selectedDate: Date) -> Bool {
         guard let cellDate = date(for: day) else {
             return false
         }
-
+        
         return Foundation.Calendar.current.isDate(cellDate, inSameDayAs: selectedDate)
     }
-
+    
     private var firstDate: Date {
         let calendar = Foundation.Calendar.current
         return calendar.date(from: DateComponents(year: year, month: month, day: 1)) ?? .now

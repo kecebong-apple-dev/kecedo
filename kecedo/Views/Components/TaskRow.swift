@@ -17,9 +17,12 @@ struct TaskRow: View {
     
     // Status deadline logic
     private var statusInfo: (text: String, color: Color, icon: String?) {
-        let dateString = DateFormatter.matrixTime.string(from: task.endDate).localized(appLanguage)
+        let formatter = DateFormatter.localizedFormatter(language: appLanguage)
+
+        formatter.dateFormat = "MMM d, h:mm a"
         
-        // Jika tugas sudah selesai, tampilkan abu-abu netral
+        let dateString = formatter.string(from: task.endDate)
+        
         if task.isDone {
             return (dateString, .gray, nil)
         }
@@ -27,9 +30,8 @@ struct TaskRow: View {
         let timeInterval = task.endDate.timeIntervalSinceNow
         
         if timeInterval < 0 {
-            // Overdue (Lebih dari batas waktu) -> Merah
             return ("Overdue - %@".localized(appLanguage, dateString), .red, "exclamationmark.circle.fill")
-        } else if timeInterval < 86400 { // Kurang dari 24 Jam -> Oranye
+        } else if timeInterval < 86400 {
             let hours = Int(timeInterval / 3600)
             let hourText: String
             if hours > 0 {
