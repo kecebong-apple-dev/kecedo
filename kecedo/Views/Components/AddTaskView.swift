@@ -59,10 +59,14 @@ struct AddTaskView: View {
                 VStack (alignment: .leading, spacing: 14) {
                     TextField("Title".localized(appLanguage), text: $title)
                         .inputFieldStyle()
+                        .foregroundStyle(.primary)
+                        
                     ZStack (alignment: .bottomTrailing) {
                         TextField("Description".localized(appLanguage), text: $desc, axis: .vertical)
                             .lineLimit(4...4)
                             .inputFieldStyle()
+                            .foregroundStyle(.primary)
+                            
                         if desc.isEmpty {
                             Button {
                                 showImageSourceDialog = true
@@ -110,7 +114,13 @@ struct AddTaskView: View {
                     DatePicker("End Date".localized(appLanguage), selection: $endDate, in: startDate...)
                         .inputFieldStyle()
                     
-                    Text("Matrix Area".localized(appLanguage)).fontWeight(.bold).font(.title2).padding(.horizontal, 16).padding(.top, 6)
+                    Text("Matrix Area".localized(appLanguage))
+                        .fontWeight(.bold)
+                        .font(.title2)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 6)
+                        .foregroundStyle(.primary)
+                        
                     HStack {
                         ForEach([Priority.doFirst, Priority.schedule, Priority.delegate, Priority.eliminate], id: \.self) { priority in
                             Button {
@@ -120,7 +130,7 @@ struct AddTaskView: View {
                             } label: {
                                 ZStack {
                                     RoundedRectangle(cornerRadius: 16)
-                                        .fill(matrix == priority ? priority.color.secondary : .white)
+                                        .fill(matrix == priority ? priority.color.secondary : Color(UIColor.secondarySystemBackground))
                                         .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
                                     
                                     MatrixGridBadge(priority: priority)
@@ -150,7 +160,7 @@ struct AddTaskView: View {
                         }
                         .padding()
                         .foregroundStyle(.red)
-                        .background(Color.red.opacity(0.1))
+                        .background(Color.red.opacity(0.15))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .padding(.horizontal, 36)
                         .padding(.top, 20)
@@ -179,7 +189,8 @@ struct AddTaskView: View {
                             Image(systemName: "xmark")
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(.gray.opacity(0.8))
+                        .tint(Color(UIColor.tertiarySystemFill))
+                        .foregroundStyle(.primary)
                         .confirmationDialog("Discard Changes".localized(appLanguage), isPresented: $showDiscardConfirmation, titleVisibility: .visible) {
                             Button("Discard".localized(appLanguage), role: .destructive) {
                                 dismiss()
@@ -202,6 +213,7 @@ struct AddTaskView: View {
                     }
                 }
                 .presentationDetents(taskToEdit == nil ? [.medium, .large] : [.large])
+                .background(Color(UIColor.systemBackground))
             }
         }
     }

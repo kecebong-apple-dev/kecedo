@@ -100,7 +100,7 @@ struct CalendarView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(selectedDateText)
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
-                .foregroundStyle(.black)
+                .foregroundStyle(.primary)
                 .padding(.horizontal, 16)
                 .padding(.top, 2)
             FilteredTaskListView(selectedDate: selectedDate, selectedTask: $selectedTask, appLanguage: appLanguage)
@@ -229,7 +229,7 @@ private struct CalendarCard: View {
                     HStack(spacing: 6) {
                         Text(month.title(language: appLanguage))
                             .font(.system(size: 19, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.primary)
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(.blue)
@@ -255,7 +255,7 @@ private struct CalendarCard: View {
                 ForEach(weekSymbols, id: \.self) { symbol in
                     Text(symbol)
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Color.black.opacity(0.22))
+                        .foregroundStyle(Color.primary.opacity(0.22))
                         .frame(maxWidth: .infinity)
                 }
 
@@ -278,7 +278,7 @@ private struct CalendarCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.white.opacity(0.95), lineWidth: 1)
+                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
         }
     }
 }
@@ -294,7 +294,7 @@ private struct CalendarDateCell: View {
             VStack(spacing: 4) {
                 Text("\(day)")
                     .font(.system(size: 21, weight: .medium, design: .rounded))
-                    .foregroundStyle(isSelected ? .blue : .black)
+                    .foregroundStyle(isSelected ? .blue : .primary)
                     .frame(width: 42, height: 42)
                     .background(isSelected ? Color.blue.opacity(0.14) : Color.clear)
                     .clipShape(Circle())
@@ -326,13 +326,13 @@ private struct CircleIconButton: View {
         Button(action: {}) {
             Image(systemName: systemImage)
                 .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(.black)
+                .foregroundStyle(.primary)
                 .frame(width: 38, height: 38)
-                .background(Color(hex: "#F2F4EF"))
+                .background(Color(UIColor.secondarySystemBackground))
                 .clipShape(Circle())
                 .overlay {
                     Circle()
-                        .stroke(Color.white.opacity(0.9), lineWidth: 1)
+                        .stroke(Color(UIColor.systemBackground).opacity(0.9), lineWidth: 1)
                 }
                 .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
         }
@@ -343,7 +343,7 @@ private struct CircleIconButton: View {
 private struct TaskGridIcon: View {
     let taskColor: Color
 
-    private let inactiveStroke = Color.black.opacity(0.10)
+    private let inactiveStroke = Color.primary.opacity(0.10)
     private let squareSize: CGFloat = 11
     private let cornerRadius: CGFloat = 4
     private let spacing: CGFloat = 4
@@ -450,7 +450,7 @@ private struct MonthYearPickerSheet: View {
             HStack {
                 Text("Select Month".localized(appLanguage))
                     .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.primary)
                 Spacer()
                 Button("Done".localized(appLanguage)) {
                     let date = Foundation.Calendar.current.date(

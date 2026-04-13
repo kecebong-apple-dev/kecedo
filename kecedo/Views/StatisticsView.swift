@@ -69,6 +69,7 @@ struct StatisticsView: View {
                     .padding(.top, 18)
                     .padding(.bottom, 32)
                 }
+                .background(Color(UIColor.systemGroupedBackground)) // Mendukung adaptasi gelap/terang native
             }
             .toolbarMain(
                 title: "Statistics".localized(appLanguage),
@@ -89,7 +90,7 @@ struct StatisticsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Completed Task Overview".localized(appLanguage))
                 .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(Color(hex: "#222222"))
+                .foregroundStyle(.primary)
 
             if completedTasks.isEmpty {
                 Text("No completed tasks yet.".localized(appLanguage))
@@ -115,8 +116,8 @@ struct StatisticsView: View {
         }
         .padding(.horizontal, 22)
         .padding(.vertical, 16)
-        .background(.white.opacity(0.97), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 20, y: 10)
+        .background(Color(UIColor.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .shadow(color: .black.opacity(0.04), radius: 10, y: 5) // Bayangan lebih halus
     }
 
     private var countCards: some View {
@@ -130,7 +131,7 @@ struct StatisticsView: View {
 
                     Text("\(count)")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(Color(hex: "#1F1F1F"))
+                        .foregroundStyle(.primary)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 18)
@@ -149,22 +150,22 @@ struct StatisticsView: View {
                     .font(.system(size: 14, weight: .bold))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color(hex: "#F4F4F4"), in: Capsule())
+                    .background(Color(UIColor.tertiarySystemGroupedBackground), in: Capsule())
 
                 Text(texts.subtitle)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(Color(hex: "#202020"))
+                    .foregroundStyle(.primary)
 
                 Text(texts.description)
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundStyle(Color(hex: "#4A4A4A"))
+                    .foregroundStyle(.secondary)
             }
 
             Spacer(minLength: 0)
         }
         .padding(16)
-        .background(.white.opacity(0.97), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .shadow(color: .black.opacity(0.05), radius: 18, y: 10)
+        .background(Color(UIColor.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .shadow(color: .black.opacity(0.04), radius: 10, y: 5)
     }
 }
 

@@ -48,7 +48,7 @@ private struct PrioritySelector: View {
     
     /// Determines the background color based on selection and priority
     private func backgroundColor(for priority: Priority, isSelected: Bool) -> Color {
-        guard isSelected else { return .white }
+        guard isSelected else { return Color(UIColor.systemBackground) }
         return priority.color.secondary
     }
 }

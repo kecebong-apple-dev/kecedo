@@ -26,7 +26,8 @@ private struct QuadrantCellView: View {
                         onTap(task)
                     }
                     if task.id != tasks.last?.id {
-                        Divider().opacity(0.4)
+                        Divider()
+                            .background(Color.primary.opacity(0.15)) // Support lebih halus di dark mode
                     }
                 }
                 Color.clear.frame(height: 8)
@@ -60,12 +61,12 @@ private struct TaskRowView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(task.title)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(task.isDone ? Color(.systemGray3) : .primary)
-                    .strikethrough(task.isDone, color: Color(.systemGray3))
+                    .foregroundColor(task.isDone ? Color(.systemGray) : .primary)
+                    .strikethrough(task.isDone, color: Color(.systemGray    ))
                     .lineLimit(1)
                 Text("\(Image(systemName: "alarm.fill")) \(dateText)")
                     .font(.system(size: 11))
-                    .foregroundColor(task.isDone ? Color(.systemGray4) : .secondary)
+                    .foregroundColor(task.isDone ? Color(.systemGray2) : .secondary)
                     .lineLimit(1)
             }
             Spacer()
@@ -198,6 +199,7 @@ struct MatrixView: View {
                 }
             }
             .padding(.bottom, 10)
+            .background(Color(UIColor.systemBackground)) // Pastikan base view aman dari tema gelap
             .navigationBarTitleDisplayMode(.inline)
             .toolbarMain(
                 title: "Matrix".localized(appLanguage),

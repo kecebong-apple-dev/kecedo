@@ -63,9 +63,50 @@ struct SettingsView: View {
                 
                 Divider().padding(.horizontal)
                 
+                // Font Size
+                HStack {
+                    Text("Font Size".localized(language))
+                    Spacer()
+                    
+                    Text("\(fontSize)")
+                        .foregroundColor(.gray)
+                        .padding(.trailing, 8)
+                        
+                    HStack(spacing: 0) {
+                        Button {
+                            if fontSize > 10 { fontSize -= 1 }
+                        } label: {
+                            Image(systemName: "minus")
+                                .font(.system(size: 14, weight: .bold))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                        }
+                        .foregroundColor(.primary)
+                        
+                        Divider()
+                            .frame(height: 16)
+                        
+                        Button {
+                            if fontSize < 24 { fontSize += 1 }
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 14, weight: .bold))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                        }
+                        .foregroundColor(.primary)
+                    }
+                }
+                .padding()
+                
+                Divider().padding(.horizontal)
+                
                 // Light Mode
                 HStack {
-                    Toggle("Light Mode".localized(language), isOn: $isLightMode)
+                    Toggle("Night Mode".localized(language), isOn: Binding(
+                        get: { !isLightMode },
+                        set: { isLightMode = !$0 }
+                    ))
                         .tint(Color(hex: "#33C65B"))
                 }
                 .padding()
@@ -84,7 +125,7 @@ struct SettingsView: View {
                     .padding()
                 }
             }
-            .background(Color.white)
+            .background(Color(UIColor.systemBackground))
             .cornerRadius(16)
             .shadow(color: Color.black.opacity(0.02), radius: 10, x: 0, y: 4)
             
