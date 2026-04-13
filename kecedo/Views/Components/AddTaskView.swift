@@ -197,6 +197,8 @@ struct AddTaskView: View {
                         }
                         .buttonStyle(.glassProminent)
                         .foregroundColor(.white)
+                        .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .opacity(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1.0)
                     }
                 }
                 .presentationDetents(taskToEdit == nil ? [.medium, .large] : [.large])
@@ -242,14 +244,17 @@ struct AddTaskView: View {
     }
     
     private func saveTask(){
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedTitle.isEmpty else { return }
+        
         if let task = taskToEdit {
-            task.title = title
+            task.title = trimmedTitle
             task.desc = desc
             task.startDate = startDate
             task.endDate = endDate
             task.priority = matrix
         } else {
-            let newTask: TaskModel = TaskModel(title: title, desc: desc, startDate: startDate, endDate: endDate, priority: matrix, isDone: false)
+            let newTask: TaskModel = TaskModel(title: trimmedTitle, desc: desc, startDate: startDate, endDate: endDate, priority: matrix, isDone: false)
             modelContext.insert(newTask)
         }
         
