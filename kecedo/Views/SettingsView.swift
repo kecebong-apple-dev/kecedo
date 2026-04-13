@@ -81,7 +81,7 @@ struct SettingsView: View {
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
                         }
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         
                         Divider()
                             .frame(height: 16)
@@ -94,7 +94,7 @@ struct SettingsView: View {
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
                         }
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                     }
                     .background(Color(UIColor.systemGray6))
                     .cornerRadius(8)
@@ -105,7 +105,10 @@ struct SettingsView: View {
                 
                 // Light Mode
                 HStack {
-                    Toggle("Light Mode".localized(language), isOn: $isLightMode)
+                    Toggle("Night Mode".localized(language), isOn: Binding(
+                        get: { !isLightMode },
+                        set: { isLightMode = !$0 }
+                    ))
                         .tint(Color(hex: "#33C65B"))
                 }
                 .padding()
@@ -124,7 +127,7 @@ struct SettingsView: View {
                     .padding()
                 }
             }
-            .background(Color.white)
+            .background(Color(UIColor.systemBackground))
             .cornerRadius(16)
             .shadow(color: Color.black.opacity(0.02), radius: 10, x: 0, y: 4)
             

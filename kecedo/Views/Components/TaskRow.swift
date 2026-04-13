@@ -94,7 +94,7 @@ struct TaskRow: View {
             .buttonStyle(.plain)
         }
         .padding()
-        .background(Color.white)
+        .background(Color(UIColor.systemBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.04), radius: 5, y: 2)
         .contentShape(Rectangle())

@@ -26,7 +26,8 @@ private struct QuadrantCellView: View {
                         onTap(task)
                     }
                     if task.id != tasks.last?.id {
-                        Divider().opacity(0.4)
+                        Divider()
+                            .background(Color.primary.opacity(0.15)) // Support lebih halus di dark mode
                     }
                 }
                 Color.clear.frame(height: 8)
@@ -198,6 +199,7 @@ struct MatrixView: View {
                 }
             }
             .padding(.bottom, 10)
+            .background(Color(UIColor.systemBackground)) // Pastikan base view aman dari tema gelap
             .navigationBarTitleDisplayMode(.inline)
             .toolbarMain(
                 title: "Matrix".localized(appLanguage),
