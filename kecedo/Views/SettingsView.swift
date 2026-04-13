@@ -96,8 +96,6 @@ struct SettingsView: View {
                         }
                         .foregroundColor(.primary)
                     }
-                    .background(Color(UIColor.systemGray6))
-                    .cornerRadius(8)
                 }
                 .padding()
                 
