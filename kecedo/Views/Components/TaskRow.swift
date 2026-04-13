@@ -17,9 +17,7 @@ struct TaskRow: View {
     
     // Status deadline logic
     private var statusInfo: (text: String, color: Color, icon: String?) {
-        let formatter = DateFormatter.localizedFormatter(language: appLanguage)
-        formatter.dateFormat = "HH:mm"
-        let dateString = formatter.string(from: task.endDate)
+        let dateString = DateFormatter.matrixTime.string(from: task.endDate).localized(appLanguage)
         
         // Jika tugas sudah selesai, tampilkan abu-abu netral
         if task.isDone {
