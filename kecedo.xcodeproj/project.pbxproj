@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D8EDEBF32F8DD51B004CD5CF /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = D8EDEBF22F8DD51B004CD5CF /* AppIcon.icon */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		1D0775902F83097B008A7F0D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		1D0775802F83097A008A7F0D /* kecedo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kecedo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D07758F2F83097B008A7F0D /* kecedoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = kecedoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D0775992F83097B008A7F0D /* kecedoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = kecedoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D8EDEBF22F8DD51B004CD5CF /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +84,7 @@
 				1D0775922F83097B008A7F0D /* kecedoTests */,
 				1D07759C2F83097B008A7F0D /* kecedoUITests */,
 				1D0775812F83097A008A7F0D /* Products */,
+				D8EDEBF22F8DD51B004CD5CF /* AppIcon.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -214,6 +220,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8EDEBF32F8DD51B004CD5CF /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

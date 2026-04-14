@@ -69,7 +69,7 @@ struct StatisticsView: View {
                     .padding(.top, 18)
                     .padding(.bottom, 32)
                 }
-                .background(Color(UIColor.systemGroupedBackground)) // Mendukung adaptasi gelap/terang native
+                .background(Color(UIColor.systemBackground)) 
             }
             .toolbarMain(
                 title: "Statistics".localized(appLanguage),
