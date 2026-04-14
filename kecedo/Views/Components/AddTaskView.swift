@@ -189,8 +189,7 @@ struct AddTaskView: View {
                             Image(systemName: "xmark")
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(Color(UIColor.tertiarySystemFill))
-                        .foregroundStyle(.primary)
+                        .tint(.gray.opacity(0.8))
                         .confirmationDialog("Discard Changes".localized(appLanguage), isPresented: $showDiscardConfirmation, titleVisibility: .visible) {
                             Button("Discard".localized(appLanguage), role: .destructive) {
                                 dismiss()

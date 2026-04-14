@@ -208,8 +208,6 @@
 			);
 		};
 /* End PBXProject section */
-/* Begin PBXBuildFile section */
-/* End PBXBuildFile section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1D07757E2F83097A008A7F0D /* Resources */ = {
@@ -234,9 +232,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1D07757C2F83097A008A7F0D /* Sources */ = {
