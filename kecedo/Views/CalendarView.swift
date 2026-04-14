@@ -275,11 +275,6 @@ private struct CalendarCard: View {
             }
         }
         .padding(.horizontal, 14)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
-        }
     }
 }
 

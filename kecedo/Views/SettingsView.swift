@@ -63,44 +63,6 @@ struct SettingsView: View {
                 
                 Divider().padding(.horizontal)
                 
-                // Font Size
-                HStack {
-                    Text("Font Size".localized(language))
-                    Spacer()
-                    
-                    Text("\(fontSize)")
-                        .foregroundColor(.gray)
-                        .padding(.trailing, 8)
-                        
-                    HStack(spacing: 0) {
-                        Button {
-                            if fontSize > 10 { fontSize -= 1 }
-                        } label: {
-                            Image(systemName: "minus")
-                                .font(.system(size: 14, weight: .bold))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                        }
-                        .foregroundColor(.primary)
-                        
-                        Divider()
-                            .frame(height: 16)
-                        
-                        Button {
-                            if fontSize < 24 { fontSize += 1 }
-                        } label: {
-                            Image(systemName: "plus")
-                                .font(.system(size: 14, weight: .bold))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                        }
-                        .foregroundColor(.primary)
-                    }
-                }
-                .padding()
-                
-                Divider().padding(.horizontal)
-                
                 // Light Mode
                 HStack {
                     Toggle("Night Mode".localized(language), isOn: Binding(
