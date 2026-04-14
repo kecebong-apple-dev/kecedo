@@ -63,7 +63,7 @@ struct AddTaskView: View {
                         
                     ZStack (alignment: .bottomTrailing) {
                         TextField("Description".localized(appLanguage), text: $desc, axis: .vertical)
-                            .lineLimit(4...4)
+                            .lineLimit(4...)
                             .inputFieldStyle()
                             .foregroundStyle(.primary)
                             

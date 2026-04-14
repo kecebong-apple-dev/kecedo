@@ -45,15 +45,21 @@ private struct QuadrantCellView: View {
 // MARK: Task Row
 
 private struct TaskRowView: View {
+    @AppStorage("appLanguage") private var appLanguage: String = "English"
+    
     let task: TaskModel
     let priority: Priority
     let onToggle: () -> Void
     let onTap: () -> Void
 
     private var dateText: String {
-        let f = DateFormatter()
-        f.dateFormat = "MMM d, h:mm a"
-        return f.string(from: task.endDate)
+        let formatter = DateFormatter.localizedFormatter(language: appLanguage)
+        
+        formatter.dateFormat = "MMM d, h:mm a"
+        
+        let dateString = formatter.string(from: task.endDate)
+        
+        return dateString
     }
 
     var body: some View {
@@ -61,11 +67,14 @@ private struct TaskRowView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(task.title)
                     .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(task.isDone ? Color(.systemGray3) : .primary)
+                    .strikethrough(task.isDone, color: Color(.systemGray3))
                     .foregroundColor(task.isDone ? Color(.systemGray) : .primary)
                     .strikethrough(task.isDone, color: Color(.systemGray    ))
                     .lineLimit(1)
                 Text("\(Image(systemName: "alarm.fill")) \(dateText)")
                     .font(.system(size: 11))
+                    .foregroundColor(task.isDone ? Color(.systemGray4) : .secondary)
                     .foregroundColor(task.isDone ? Color(.systemGray2) : .secondary)
                     .lineLimit(1)
             }
@@ -99,8 +108,11 @@ private struct TaskRowView: View {
 struct MatrixView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "English"
 
-    // Fetch all tasks from SwiftData; sort by endDate ascending
-    @Query(sort: \TaskModel.endDate) private var allTasks: [TaskModel]
+    @Query(sort: [
+        SortDescriptor(\TaskModel.isDone, order: .forward),
+        SortDescriptor(\TaskModel.endDate, order: .forward)
+    ]) private var allTasks: [TaskModel]
+    
     @Environment(\.modelContext) private var context
 
     @State private var showingAddTask = false

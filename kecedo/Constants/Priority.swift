@@ -47,29 +47,29 @@ enum Priority: String, Codable, Identifiable, CaseIterable {
     // set color eisenhower dengan adaptasi dark mode
     var color: MultiColor {
         switch self {
-        case .all:       
+        case .all:
             return MultiColor(
-                primary: Color.dynamic(light: "#181D33", dark: "#E3E3E3"), 
+                primary: Color.dynamic(light: "#181D33", dark: "#E3E3E3"),
                 secondary: Color.dynamic(light: "#E3E3E3", dark: "#2C2C2E")
             )
-        case .doFirst:   
+        case .doFirst:
             return MultiColor(
-                primary: Color(hex: "#33C65B"), 
+                primary: Color(hex: "#33C65B"),
                 secondary: Color.dynamic(light: "#E2FFEA", dark: "#12381F")
             )
-        case .schedule:  
+        case .schedule:
             return MultiColor(
-                primary: Color(hex: "#FFCC01"), 
+                primary: Color(hex: "#FFCC01"),
                 secondary: Color.dynamic(light: "#FFF6D2", dark: "#473A00")
             )
-        case .delegate:  
+        case .delegate:
             return MultiColor(
-                primary: Color(hex: "#29B9FF"), 
+                primary: Color(hex: "#29B9FF"),
                 secondary: Color.dynamic(light: "#CFEFFF", dark: "#0A354C")
             )
-        case .eliminate: 
+        case .eliminate:
             return MultiColor(
-                primary: Color(hex: "#EF4C14"), 
+                primary: Color(hex: "#EF4C14"),
                 secondary: Color.dynamic(light: "#FFE5DC", dark: "#4C1605")
             )
         }

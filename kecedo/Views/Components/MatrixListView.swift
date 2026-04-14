@@ -8,15 +8,6 @@
 import SwiftUI
 import SwiftData
 
-// MARK: - Extensions / Helpers
-extension DateFormatter {
-    static let matrixTime: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, h:mm a"
-        return formatter
-    }()
-}
-
 /// A horizontal selector for picking a matrix priority filter
 private struct PrioritySelector: View {
     let selected: Priority
@@ -58,7 +49,10 @@ struct MatrixListView: View {
     @Environment(\.modelContext) private var modelContext
     @AppStorage("appLanguage") private var appLanguage: String = "English"
     
-    @Query(sort: \TaskModel.endDate) private var tasks: [TaskModel]
+    @Query(sort: [
+        SortDescriptor(\TaskModel.isDone, order: .forward),
+        SortDescriptor(\TaskModel.endDate, order: .forward)
+    ]) private var tasks: [TaskModel]
     
     var filterState: MatrixFilterState = MatrixFilterState()
     var onSettings: () -> Void = {}
