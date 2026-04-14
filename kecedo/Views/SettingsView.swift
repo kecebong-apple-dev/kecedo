@@ -7,35 +7,48 @@
 
 import SwiftUI
 
+enum ThemeMode: String, CaseIterable {
+    case system = "System"
+    case light = "Light"
+    case dark = "Dark"
+}
+
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var systemColorScheme
     
     @AppStorage("appLanguage") private var appLanguage: String = "English"
     @AppStorage("appFontSize") private var appFontSize: Int = 14
     @AppStorage("appIsLightMode") private var appIsLightMode: Bool = true
+    @AppStorage("useSystemTheme") private var useSystemTheme: Bool = true
     
-    // Current state
+    // Current state (Draft)
     @State private var language: String = "English"
     @State private var fontSize: Int = 14
-    @State private var isLightMode: Bool = true
+    @State private var theme: ThemeMode = .system
     
     // Initial state to track changes
     @State private var initialLanguage: String = "English"
     @State private var initialFontSize: Int = 14
-    @State private var initialIsLightMode: Bool = true
+    @State private var initialTheme: ThemeMode = .system
     
     @State private var showingConfirmAlert = false
     
     private var hasChanges: Bool {
         language != initialLanguage ||
         fontSize != initialFontSize ||
-        isLightMode != initialIsLightMode
+        theme != initialTheme
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            Text("Header".localized(language))
+                .font(.headline)
+                .padding(.leading, 8)
+                .padding(.top, 16)
+            
             VStack(spacing: 0) {
-                // Language
+                // Language Menu
                 HStack {
                     Text("Language".localized(language))
                     Spacer()
@@ -58,13 +71,16 @@ struct SettingsView: View {
                 
                 Divider().padding(.horizontal)
                 
-                // Light Mode
-                HStack {
-                    Toggle("Night Mode".localized(language), isOn: Binding(
-                        get: { !isLightMode },
-                        set: { isLightMode = !$0 }
-                    ))
-                        .tint(Color(hex: "#33C65B"))
+                // Theme Picker (Tampilan Segmented / Button Group)
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Theme".localized(language))
+                    
+                    Picker("Theme", selection: $theme) {
+                        Text("System".localized(language)).tag(ThemeMode.system)
+                        Text("Light".localized(language)).tag(ThemeMode.light)
+                        Text("Dark".localized(language)).tag(ThemeMode.dark)
+                    }
+                    .pickerStyle(.segmented)
                 }
                 .padding()
                 
@@ -91,25 +107,44 @@ struct SettingsView: View {
         .padding()
         .background(Color(UIColor.systemGroupedBackground).ignoresSafeArea())
         .onAppear {
+            // Setup bahasa & font
             language = appLanguage
             initialLanguage = appLanguage
             fontSize = appFontSize
             initialFontSize = appFontSize
-            isLightMode = appIsLightMode
-            initialIsLightMode = appIsLightMode
+            
+            if useSystemTheme {
+                theme = .system
+            } else {
+                theme = appIsLightMode ? .light : .dark
+            }
+            initialTheme = theme
         }
         .navigationTitle("Settings".localized(language))
         .navigationBarTitleDisplayMode(.inline)
         .alert("Confirm Changes".localized(language), isPresented: $showingConfirmAlert) {
             Button("Cancel".localized(language), role: .cancel) { }
             Button("Confirm".localized(language)) {
+                // Update Initial States
                 initialLanguage = language
                 initialFontSize = fontSize
-                initialIsLightMode = isLightMode
+                initialTheme = theme
                 
+                // Save Language & Font
                 appLanguage = language
                 appFontSize = fontSize
-                appIsLightMode = isLightMode
+                
+                switch theme {
+                case .system:
+                    useSystemTheme = true
+                    appIsLightMode = (systemColorScheme == .light)
+                case .light:
+                    useSystemTheme = false
+                    appIsLightMode = true
+                case .dark:
+                    useSystemTheme = false
+                    appIsLightMode = false
+                }
             }
         } message: {
             Text("Are you sure you want to apply these changes?".localized(language))
