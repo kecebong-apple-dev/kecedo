@@ -13,7 +13,7 @@ struct StatisticsView: View {
     @Query private var tasks: [TaskModel]
     @AppStorage("appLanguage") private var appLanguage: String = "English"
     @State private var navigateToSettings = false
-
+    
     private var completedTasks: [TaskModel] {
         tasks.filter { $0.isDone }
     }
@@ -27,35 +27,57 @@ struct StatisticsView: View {
         }.count
     }
     
+    @ViewBuilder
+    private func progressCardImage() -> some View {
+        let completed = tasksCompletedToday
+
+        if completed == 0 {
+            Image("kecebong1Img").resizable()
+                .scaledToFill()
+                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+                .clipped()
+        } else if completed == 1 {
+            Image("kecebong2Img").resizable()
+                .scaledToFill()
+                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+                .clipped()
+        } else {
+            Image("kecebong3Img").resizable()
+                .scaledToFill()
+                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+                .clipped()
+        }
+    }
+ 
     private var progressCardTexts: (title: String, subtitle: String, description: String) {
         let completed = tasksCompletedToday
         let toComplete = tasks.filter { !$0.isDone }.count
         
         if completed == 0 {
             if toComplete > 0 {
-                return ("Ready to start?".localized(appLanguage), 
-                        "Let's get things moving.".localized(appLanguage), 
+                return ("Ready to start?".localized(appLanguage),
+                        "Let's get things moving.".localized(appLanguage),
                         "You have %lld tasks ready to go.".localized(appLanguage, Int64(toComplete)))
             } else {
-                return ("All Caught Up".localized(appLanguage), 
-                        "No tasks on your plate.".localized(appLanguage), 
+                return ("All Caught Up".localized(appLanguage),
+                        "No tasks on your plate.".localized(appLanguage),
                         "Enjoy your day!".localized(appLanguage))
             }
         } else if completed == 1 {
-            return ("Great Start!".localized(appLanguage), 
-                    "Good job getting started.".localized(appLanguage), 
+            return ("Great Start!".localized(appLanguage),
+                    "Good job getting started.".localized(appLanguage),
                     "You completed 1 task today.".localized(appLanguage))
         } else if completed <= 3 {
-            return ("Nice Progress".localized(appLanguage), 
-                    "Keep up the good work!".localized(appLanguage), 
+            return ("Nice Progress".localized(appLanguage),
+                    "Keep up the good work!".localized(appLanguage),
                     "You completed %lld tasks today.".localized(appLanguage, Int64(completed)))
         } else {
-            return ("Excellent Work".localized(appLanguage), 
-                    "You're crushing it today.".localized(appLanguage), 
+            return ("Excellent Work".localized(appLanguage),
+                    "You're crushing it today.".localized(appLanguage),
                     "You completed %lld tasks today.".localized(appLanguage, Int64(completed)))
         }
     }
-
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -69,7 +91,7 @@ struct StatisticsView: View {
                     .padding(.top, 18)
                     .padding(.bottom, 32)
                 }
-                .background(Color(UIColor.systemBackground)) 
+                .background(Color(UIColor.systemBackground))
             }
             .toolbarMain(
                 title: "Statistics".localized(appLanguage),
@@ -85,13 +107,13 @@ struct StatisticsView: View {
             }
         }
     }
-
+    
     private var overviewCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Completed Task Overview".localized(appLanguage))
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(.primary)
-
+            
             if completedTasks.isEmpty {
                 Text("No completed tasks yet.".localized(appLanguage))
                     .font(.system(size: 14, weight: .regular))
@@ -119,7 +141,7 @@ struct StatisticsView: View {
         .background(Color(UIColor.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .shadow(color: .black.opacity(0.04), radius: 10, y: 5) // Bayangan lebih halus
     }
-
+    
     private var countCards: some View {
         HStack(spacing: 10) {
             ForEach(Priority.allCases.filter { $0 != .all }) { priority in
@@ -128,7 +150,7 @@ struct StatisticsView: View {
                 HStack(spacing: 8) {
                     MatrixGridBadge(priority: priority)
                         .frame(width: 22, height: 22)
-
+                    
                     Text("\(count)")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(.primary)
@@ -140,30 +162,34 @@ struct StatisticsView: View {
             }
         }
     }
-
+    
     private var progressCard: some View {
         let texts = progressCardTexts
-        
-        return HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 10) {
+
+        return HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(texts.title)
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 12, weight: .bold))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color(UIColor.tertiarySystemGroupedBackground), in: Capsule())
-
+                    .background(Color(UIColor.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(.white, lineWidth: 1)
+                    )
+                    .shadow(color: .black.opacity(0.1), radius: 1, x: 0, y: 1)
+                
                 Text(texts.subtitle)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.primary)
-
+                
                 Text(texts.description)
-                    .font(.system(size: 14, weight: .regular))
+                    .font(.system(size: 10, weight: .regular))
                     .foregroundStyle(.secondary)
             }
-
-            Spacer(minLength: 0)
+            .padding(16)
+            progressCardImage()
         }
-        .padding(16)
         .background(Color(UIColor.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .shadow(color: .black.opacity(0.04), radius: 10, y: 5)
     }

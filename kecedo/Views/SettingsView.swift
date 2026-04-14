@@ -34,11 +34,6 @@ struct SettingsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Header".localized(language))
-                .font(.headline)
-                .padding(.leading, 8)
-                .padding(.top, 16)
-            
             VStack(spacing: 0) {
                 // Language
                 HStack {
